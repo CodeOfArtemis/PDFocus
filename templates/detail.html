@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ pdf.title }}</h2>
+
+    <form method="post" class="pdf-meta-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label><strong>Автор:</strong></label>
+            <input type="text" name="authors" value="{{ pdf.authors }}" class="editable-field">
+        </div>
+
+        <div class="form-group">
+            <label><strong>Тип:</strong></label>
+            <select name="doc_type" class="editable-field">
+                <option value="Книга" {% if pdf.doc_type == "Книга" %}selected{% endif %}>Книга</option>
+                <option value="Статья" {% if pdf.doc_type == "Статья" %}selected{% endif %}>Статья</option>
+                <option value="Отчет" {% if pdf.doc_type == "Отчет" %}selected{% endif %}>Отчет</option>
+                <option value="Другое" {% if pdf.doc_type == "Другое" %}selected{% endif %}>Другое</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label><strong>Тема:</strong></label>
+            <input type="text" name="theme" value="{{ pdf.theme }}" class="editable-field">
+        </div>
+
+        <div class="form-group">
+            <label><strong>Ключевые слова:</strong></label>
+            <input type="text" name="keywords" value="{{ pdf.keywords }}" class="editable-field">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn save-btn">Сохранить изменения</button>
+            <a href="{{ pdf.file.url }}" class="btn" download>Скачать PDF</a>
+        </div>
+    </form>
+
+    <div class="extracted-text">
+        <h3>Извлеченный текст:</h3>
+        <textarea readonly style="width: 100%; height: 500px">{{ pdf.extracted_text }}</textarea>
+    </div>
+</div>
+ <style>
+     .pdf-meta-form {
+    margin-bottom: 20px;
+    }
+
+    .form-group {
+    margin-bottom: 15px;
+    }
+
+    .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    }
+
+    .editable-field {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    }
+
+    select.editable-field {
+    height: 38px;
+    }
+
+    .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    }
+
+    .save-btn {
+    background-color: #4CAF50;
+    color: white;
+    }
+
+    .save-btn:hover {
+    background-color: #45a049;
+    }
+ </style>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="pdf-viewer-container">
+    <div class="upload-area" id="upload-area">
+        <h3>Перетащите PDF-файлы сюда</h3>
+        <p>или</p>
+        {% csrf_token %}
+        <input type="file" id="pdf-upload" accept=".pdf" multiple style="display: none;">
+        <button class="upload-btn" onclick="document.getElementById('pdf-upload').click()">
+            Выберите файлы
+        </button>
+    </div>
+    <div id="pdf-viewer">
+        <div class="pdf-placeholder" id="pdf-placeholder">
+            <i>📄</i>
+            <h3>Загрузите PDF-файл</h3>
+            <p>Перетащите файл в эту область или нажмите кнопку "Выберите файлы"</p>
+        </div>
+    </div>
+    <div class="pdf-controls" id="pdf-controls" style="display: none;">
+        <div class="pdf-nav-buttons">
+            <button id="prev-page">Предыдущая</button>
+            <span id="page-num">Страница 1 из 1</span>
+            <button id="next-page">Следующая</button>
+        </div>
+        <div>
+            <button id="close-pdf" onclick="location.reload()">Закрыть PDF</button>
+        </div>
+    </div>
+</div>
+
+<div class="notes-container" id="notes-container">
+    <div class="notes-header">
+        <h3>Последние заметки</h3>
+        <button class="add-note-btn" onclick="location.href='{% url 'catalog' %}'">
+            Все заметки
+        </button>
+    </div>
+    <div class="notes-list">
+        {% for note in recent_notes %}
+        <div class="note-item">
+            <div class="note-text">{{ note.text }}</div>
+            <div class="note-meta">
+                <span>{{ note.document.title }}</span>
+                <span>Страница {{ note.page_number }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <p>Нет сохраненных заметок</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

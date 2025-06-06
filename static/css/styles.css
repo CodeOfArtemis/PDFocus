@@ -1,0 +1,459 @@
+:root {
+    --sky-blue: #7fc7ff;
+    --dark-blue: #0772c4;
+    --light-blue: #e6f3ff;
+    --menu-blue: #4a9bd8;
+    --menu-hover: #3a8bc8;
+    --light-gray: #f5f5f5;
+    --text-dark: #2c3e50;
+    --text-light: #f8f9fa;
+    --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+    --border-radius: 8px;
+    --button-hover: #3a8bc8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #fff;
+    color: var(--text-dark);
+    line-height: 1.6;
+}
+
+.account-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Боковое меню с иконками */
+.sidebar {
+    width: 280px;
+    background: linear-gradient(135deg, var(--menu-blue), var(--dark-blue));
+    padding: 1.5rem 0;
+    position: fixed;
+    height: 100vh;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    overflow-y: auto;
+    transition: var(--transition);
+}
+
+.sidebar-header {
+    padding: 0 1.5rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+}
+
+.sidebar-header h3 {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-menu {
+    list-style: none;
+}
+
+.sidebar-menu li a {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem 1.5rem;
+    color: var(--text-light);
+    text-decoration: none;
+    border-radius: 0 30px 30px 0;
+    margin: 0 0.5rem;
+    transition: var(--transition);
+}
+
+.sidebar-menu li a:hover {
+    background-color: var(--menu-hover);
+    color: white;
+    transform: translateX(5px);
+}
+
+.sidebar-menu li a.active {
+    background-color: var(--light-blue);
+    color: var(--dark-blue);
+    font-weight: 500;
+}
+
+.sidebar-menu li a i {
+    margin-right: 12px;
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+}
+
+/* Личный кабинет */
+.account-btn {
+    background: var(--sky-blue);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.account-btn:hover {
+    background: var(--button-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.account-btn i {
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+/* Остальные стили */
+header {
+    background-color: var(--sky-blue);
+    color: white;
+    padding: 1rem 2rem;
+    box-shadow: var(--shadow);
+    position: relative;
+    margin-left: 280px;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.logo {
+    font-size: 1.8rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Поисковая строка */
+.search-container {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40%;
+    max-width: 500px;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    background: white;
+    border-radius: 30px;
+    padding: 0.3rem 1rem;
+    box-shadow: var(--shadow);
+}
+
+.search-bar input {
+    flex: 1;
+    border: none;
+    outline: none;
+    padding: 0.5rem;
+    font-size: 1rem;
+}
+
+.search-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--dark-blue);
+    font-size: 1.2rem;
+}
+
+/* Основное содержимое */
+.main-container {
+    margin-left: 280px;
+    padding: 2rem;
+}
+
+/* Каталог PDF */
+.catalog-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.pdf-card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.pdf-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.pdf-preview {
+    height: 200px;
+    background: var(--light-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.pdf-preview canvas {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.pdf-info {
+    padding: 1rem;
+}
+
+.pdf-info h3 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.pdf-meta {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.pdf-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.pdf-actions button {
+    flex: 1;
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.view-btn {
+    background: var(--sky-blue);
+    padding: 5px;
+    border-radius: 5px;
+    text-decoration: none;
+    color: white;
+}
+
+.view-btn:hover {
+    background: var(--dark-blue);
+}
+
+/* Личный кабинет */
+.account-container {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+}
+
+.user-profile {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--sky-blue);
+    margin: 0 auto 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 2rem;
+}
+
+.user-stats {
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* Читалка PDF */
+.pdf-viewer-container {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+    margin-bottom: 2rem;
+}
+
+.pdf-controls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.pdf-nav-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.pdf-nav-buttons button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    background: var(--sky-blue);
+    color: white;
+    cursor: pointer;
+}
+
+#pdf-viewer {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    position: relative;
+}
+
+/* Заметки */
+.notes-container {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+}
+
+/* Загрузка файлов */
+.upload-area {
+    border: 2px dashed var(--sky-blue);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.upload-area:hover {
+    background: var(--light-blue);
+}
+
+/* Область после закрытия PDF */
+.pdf-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    color: #666;
+    text-align: center;
+    padding: 2rem;
+}
+
+.pdf-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--sky-blue);
+}
+
+/* Формы авторизации/регистрации */
+.auth-form {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.auth-form h2 {
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: var(--dark-blue);
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 0.8rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+}
+
+.auth-form button {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--sky-blue);
+    color: white;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.auth-form button:hover {
+    background: var(--dark-blue);
+}
+
+.auth-switch {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+}
+
+.auth-switch a {
+    color: var(--sky-blue);
+    cursor: pointer;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        position: relative;
+    }
+
+    header, .main-container {
+        margin-left: 0;
+    }
+
+    .account-container {
+        grid-template-columns: 1fr;
+    }
+
+    .search-container {
+        position: static;
+        transform: none;
+        width: 100%;
+        margin: 1rem 0;
+    }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>ПДФокус</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>📂 Добро пожаловать!</h3>
+        </div>
+    {% if user.is_authenticated %}
+        <ul class="sidebar-menu">
+            <li><a href="{% url 'main' %}" class="{% if request.path == '/main/' %}active{% endif %}">🏠<span>Главная</span></a></li>
+            <li><a href="{% url 'catalog' %}" class="{% if request.path == '/catalog/' %}active{% endif %}">📚<span>Каталог PDF</span></a></li>
+        </ul>
+    {% endif %}
+    </div>
+    <header>
+        <div class="header-container">
+            <div class="logo" onclick="location.href='{% url 'main' %}'">ПДФокус</div>
+            {% if user.is_authenticated %}
+            <div class="search-container">
+                <div class="search-bar">
+                    <input type="text" placeholder="Поиск PDF-файлов...">
+                    <button>🔍</button>
+                </div>
+            </div>
+            <div class="account-actions">
+                <button class="account-btn" onclick="location.href='{% url 'account' %}'">
+                    <i></i>Личный кабинет
+                </button>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button class="account-btn">Выйти</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+    </header>
+
+    <div class="main-container" style="{% if not request.user.is_authenticated %}margin-left: 0;{% endif %}">
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.mjs" type="module"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

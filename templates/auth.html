@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-tabs">
+            <button class="tab active" onclick="switchTab('login')">Вход</button>
+            <button class="tab" onclick="switchTab('register')">Регистрация</button>
+        </div>
+
+        <!-- Форма входа -->
+        <form method="post" action="{% url 'auth' %}" id="login-form" class="auth-form active">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <input type="hidden" name="login-submit" value="1">
+
+            {{ login_form.username.label_tag }}
+            {{ login_form.username }}
+
+            {{ login_form.password.label_tag }}
+            {{ login_form.password }}
+
+            <button type="submit" class="auth-btn">Войти</button>
+        </form>
+
+        <!-- Форма регистрации -->
+        <form method="post" id="register-form" class="auth-form">
+            {% csrf_token %}
+            <input type="hidden" name="register-submit" value="1">
+
+            {{ register_form.username.label_tag }}
+            {{ register_form.username }}
+
+            {{ register_form.password1.label_tag }}
+            {{ register_form.password1 }}
+
+            {{ register_form.password2.label_tag }}
+            {{ register_form.password2 }}
+
+            <button type="submit" class="auth-btn">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+    document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    document.getElementById(tabName + '-form').classList.add('active');
+    event.currentTarget.classList.add('active');
+}
+</script>
+{% endblock %}

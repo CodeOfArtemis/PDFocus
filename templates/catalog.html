@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Каталог PDF-файлов</h2>
+<div class="catalog-container">
+    {% for document in documents %}
+    <div class="pdf-card">
+        <div class="pdf-preview">
+            {% if document.thumbnail %}
+            <img src="{{ document.thumbnail.url }}" alt="{{ document.title }}">
+            {% else %}
+            <div class="pdf-icon">📄</div>
+            {% endif %}
+        </div>
+        <div class="pdf-info">
+            <h3>{{ document.title }}</h3>
+            <div class="pdf-meta">
+                <span>{{ document.authors }}</span>
+                <span>{{ document.upload_date|date:"d.m.Y" }}</span>
+            </div>
+            <div class="pdf-actions">
+                <a href="{% url 'detailed' document.id %}" class="view-btn">
+                    Открыть
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p>Вы ещё не загрузили ни одного документа</p>
+    {% endfor %}
+</div>
+{% endblock %}

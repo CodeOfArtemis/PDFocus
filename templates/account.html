@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="account-container">
+    <div class="user-profile">
+        <div class="user-avatar">{{ user.username|slice:":2"|upper }}</div>
+        <h3>{{ user.get_full_name|default:user.username }}</h3>
+        <p>Пользователь с {{ user.date_joined|date:"d.m.Y" }}</p>
+
+        <div class="user-stats">
+            <div class="stat-item">
+                <span>Файлов:</span>
+                <span>{{ documents.count }}</span>
+            </div>
+            <div class="stat-item">
+                <span>Заметок:</span>
+                <span>{{ notes.count }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="account-content">
+        <section>
+            <h3>Последние файлы</h3>
+            <div class="catalog-container">
+                {% for doc in documents|slice:":3" %}
+                <div class="pdf-card small">
+                    <div class="pdf-info">
+                        <h4>{{ doc.title }}</h4>
+                        <div class="pdf-meta">
+                            <span>{{ doc.upload_date|date:"d.m.Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="account-notes">
+            <h3>Последние заметки</h3>
+            <div class="notes-list">
+                {% for note in notes|slice:":5" %}
+                <div class="note-item">
+                    <div class="note-text">{{ note.text }}</div>
+                    <div class="note-meta">
+                        <span>{{ note.document.title }}</span>
+                        <span>Страница {{ note.page_number }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
