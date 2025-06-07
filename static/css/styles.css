@@ -333,16 +333,27 @@ header {
 }
 
 #pdf-viewer {
-    width: 100%;
-    height: 600px;
-    border: 1px solid #ddd;
+    background: #e9e9e9;
+    padding: 1rem;
     border-radius: var(--border-radius);
+    min-height: 60vh;
+    max-height: 90vh;
+    height: auto;
+    overflow-y: auto;
     position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+#pdf-viewer canvas {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
 }
 
 /* Заметки */
 .notes-container {
-    background: white;
+    background: var(--light-gray);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow);
     padding: 1rem;
