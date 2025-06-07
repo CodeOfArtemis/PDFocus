@@ -24,8 +24,13 @@ def auth_view(request):
         # Обработка входа
         if 'login-submit' in request.POST:
             active_tab = 'login'
-            # Используем request.POST напрямую, AuthenticationForm сама разберется
-            login_form = AuthenticationForm(request, data=request.POST)
+            
+            # Создаем копию данных для модификации, чтобы сделать логин нечувствительным к регистру
+            login_post_data = request.POST.copy()
+            if 'username' in login_post_data:
+                login_post_data['username'] = login_post_data['username'].lower()
+
+            login_form = AuthenticationForm(request, data=login_post_data)
             if login_form.is_valid():
                 user = login_form.get_user()
                 login(request, user)
@@ -156,6 +161,29 @@ def save_note(request):
                 'error': f'Ошибка сохранения заметки: {str(e)}'
             }, status=500)
     return None
+
+
+@login_required
+def delete_pdf(request, id):
+    document = get_object_or_404(PDFDocument, id=id)
+    
+    # Проверяем, что текущий пользователь является владельцем документа
+    if document.user != request.user:
+        messages.error(request, "У вас нет прав для удаления этого документа.")
+        return redirect('catalog')
+
+    if request.method == 'POST':
+        # Удаляем связанный файл
+        document.file.delete(save=False) # save=False, т.к. мы удалим объект целиком
+        
+        # Удаляем объект из базы данных
+        document.delete()
+        
+        messages.success(request, f'Документ "{document.title}" был успешно удален.')
+        return redirect('catalog')
+    
+    # Если это не POST-запрос, просто перенаправляем обратно
+    return redirect('catalog')
 
 
 def logout_view(request):

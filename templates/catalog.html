@@ -20,9 +20,13 @@
                 <span>{{ document.upload_date|date:"d.m.Y" }}</span>
             </div>
             <div class="pdf-actions">
-                <a href="{% url 'detailed' document.id %}" class="view-btn">
+                <a href="{% url 'detailed' document.id %}" class="btn btn-primary">
                     Открыть
                 </a>
+                <form action="{% url 'delete_pdf' document.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот файл?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Удалить</button>
+                </form>
             </div>
         </div>
     </div>

@@ -250,30 +250,29 @@ header {
 }
 
 .pdf-actions {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     margin-top: 1rem;
+    align-items: stretch;
 }
 
-.pdf-actions button {
-    flex: 1;
-    padding: 0.5rem;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: var(--transition);
+.pdf-actions > a,
+.pdf-actions > form {
+    /* Правила ниже больше не нужны, так как grid и stretch делают всю работу */
 }
 
-.view-btn {
-    background: var(--sky-blue);
-    padding: 5px;
-    border-radius: 5px;
+.pdf-actions > form {
+    display: flex;
+    margin: 0;
+}
+
+.pdf-actions > form > button {
+    flex-grow: 1;
+}
+
+.pdf-actions a:hover {
     text-decoration: none;
-    color: white;
-}
-
-.view-btn:hover {
-    background: var(--dark-blue);
 }
 
 /* Личный кабинет */
@@ -432,18 +431,6 @@ header {
 
 .auth-form button {
     width: 100%;
-    padding: 0.8rem;
-    background: var(--sky-blue);
-    color: white;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 500;
-    transition: var(--transition);
-}
-
-.auth-form button:hover {
-    background: var(--dark-blue);
 }
 
 .auth-switch {
@@ -456,6 +443,58 @@ header {
     color: var(--dark-blue);
     font-weight: 500;
     text-decoration: none;
+}
+
+/* =================================
+   ОБЩИЕ СТИЛИ КОМПОНЕНТОВ
+   ================================= */
+
+/* --- Общий стиль кнопок --- */
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    transition: var(--transition);
+    color: white; /* Белый текст по умолчанию для всех кнопок */
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Цветовые модификаторы */
+.btn-primary {
+    background-color: var(--sky-blue);
+}
+.btn-primary:hover {
+    background-color: var(--dark-blue);
+}
+
+.btn-success {
+    background-color: #28a745; /* Зеленый */
+}
+.btn-success:hover {
+    background-color: #218838;
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Серый */
+}
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.btn-danger {
+    background-color: #dc3545; /* Красный */
+}
+.btn-danger:hover {
+    background-color: #c82333;
 }
 
 /* Стили для ошибок форм */
@@ -519,6 +558,7 @@ header {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
+    margin-bottom: 1.5rem;
 }
 
 .alert.alert-danger {
@@ -538,5 +578,31 @@ header {
 .tabs-container {
     display: flex;
     justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+/* Стили для формы редактирования метаданных */
+.pdf-meta-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.pdf-meta-form .editable-field {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.pdf-meta-form .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+/* Стили для заголовка на странице detail.html */
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1.5rem;
 }

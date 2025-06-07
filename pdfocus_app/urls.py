@@ -13,6 +13,7 @@ urlpatterns = [
     path('save-note/', views.save_note, name='save_note'),
     path('catalog/', views.catalog, name='catalog'),
     path('account/', views.account, name='account'),
+    path('delete_pdf/<int:id>/', views.delete_pdf, name='delete_pdf'),
     path('logout/', auth_views.LogoutView.as_view(next_page='auth'), name='logout'),
 ]
 
