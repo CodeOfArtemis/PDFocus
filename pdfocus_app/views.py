@@ -15,9 +15,21 @@ def auth(request):
     if request.user.is_authenticated:
         return redirect(request.POST.get('next') or 'main')
 
+    # Создаем изменяемые копии POST-данных для модификации
+    login_post_data = request.POST.copy() if request.method == 'POST' else None
+    register_post_data = request.POST.copy() if request.method == 'POST' else None
+
+    # Приводим username к нижнему регистру, если данные отправлены
+    if login_post_data and 'username' in login_post_data:
+        login_post_data['username'] = login_post_data['username'].lower()
+    
+    if register_post_data and 'username' in register_post_data:
+        register_post_data['username'] = register_post_data['username'].lower()
+
+
     # Инициализация форм
-    login_form = AuthenticationForm(request, data=request.POST or None)
-    register_form = UserCreationForm(request.POST or None)
+    login_form = AuthenticationForm(request, data=login_post_data or None)
+    register_form = UserCreationForm(data=register_post_data or None)
 
     if request.method == 'POST':
         # Обработка входа

@@ -15,11 +15,33 @@
             <input type="hidden" name="next" value="{{ next }}">
             <input type="hidden" name="login-submit" value="1">
 
+            {% if login_form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in login_form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             {{ login_form.username.label_tag }}
             {{ login_form.username }}
+            {% if login_form.username.errors %}
+                <div class="field-errors">
+                    {% for error in login_form.username.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             {{ login_form.password.label_tag }}
             {{ login_form.password }}
+            {% if login_form.password.errors %}
+                <div class="field-errors">
+                    {% for error in login_form.password.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
             <button type="submit" class="auth-btn">Войти</button>
         </form>
@@ -28,15 +50,16 @@
         <form method="post" id="register-form" class="auth-form">
             {% csrf_token %}
             <input type="hidden" name="register-submit" value="1">
+            
+            {% if register_form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in register_form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
 
-            {{ register_form.username.label_tag }}
-            {{ register_form.username }}
-
-            {{ register_form.password1.label_tag }}
-            {{ register_form.password1 }}
-
-            {{ register_form.password2.label_tag }}
-            {{ register_form.password2 }}
+            {{ register_form.as_p }}
 
             <button type="submit" class="auth-btn">Зарегистрироваться</button>
         </form>
