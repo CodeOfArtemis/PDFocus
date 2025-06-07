@@ -210,6 +210,9 @@ header {
     overflow: hidden;
     box-shadow: var(--shadow);
     transition: var(--transition);
+    height: 400px;
+    display: flex;
+    flex-direction: column;
 }
 
 .pdf-card:hover {
@@ -227,26 +230,61 @@ header {
     overflow: hidden;
 }
 
-.pdf-preview canvas {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
+.pdf-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pdf-preview .pdf-icon {
+    font-size: 4rem;
+    color: #666;
 }
 
 .pdf-info {
     padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
-.pdf-info h3 {
-    margin-bottom: 0.5rem;
+.pdf-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100px;
+}
+
+.pdf-title {
+    margin: 0;
     font-size: 1.1rem;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
 }
 
 .pdf-meta {
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
+    align-items: center;
     color: #666;
-    font-size: 0.8rem;
+    font-size: 0.85rem;
+    width: 100%;
+    margin-top: auto;
+}
+
+.pdf-meta span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 48%;
 }
 
 .pdf-actions {
@@ -254,21 +292,29 @@ header {
     grid-template-columns: 1fr 1fr;
     gap: 0.5rem;
     margin-top: 1rem;
-    align-items: stretch;
 }
 
-.pdf-actions > a,
-.pdf-actions > form {
-    /* Правила ниже больше не нужны, так как grid и stretch делают всю работу */
+.pdf-actions a,
+.pdf-actions form {
+    width: 100%;
 }
 
-.pdf-actions > form {
+.pdf-actions .btn,
+.pdf-actions form button {
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+    font-size: 0.9rem;
+    white-space: nowrap;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 38px;
+    height: 38px;
     margin: 0;
-}
-
-.pdf-actions > form > button {
-    flex-grow: 1;
+    line-height: 1.5;
+    border: none;
+    box-sizing: border-box;
 }
 
 .pdf-actions a:hover {
@@ -586,23 +632,115 @@ header {
     margin-bottom: 1rem;
 }
 
-.pdf-meta-form .editable-field {
+.pdf-meta-form .editable-field,
+.note-textarea,
+.page-number-input {
     width: 100%;
     padding: 0.5rem;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
+.note-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.page-number-input {
+    width: 120px; /* Делаем поле для номера страницы компактным */
+}
+
 .pdf-meta-form .form-actions {
     display: flex;
     gap: 10px;
     margin-top: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-/* Стили для заголовка на странице detail.html */
-.detail-header {
+.note-form-footer {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Стили для секции заметок на странице detail.html */
+.notes-section {
+    margin-top: 2rem;
     margin-bottom: 1.5rem;
+}
+
+.note-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.note-form-footer {
+    display: flex;
+    justify-content: flex-end; /* Выравниваем по правому краю */
+    align-items: center;
+    gap: 10px;
+}
+
+.notes-list .note-item {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--sky-blue);
+}
+
+.note-item .note-text {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.note-item .note-meta {
+    font-size: 0.8rem;
+    color: #6c757d;
+}
+
+/* Стили для кнопки "Назад к каталогу" */
+.back-to-catalog-btn {
+    display: block;
+    width: fit-content; /* Ширина по содержимому */
+    margin-left: auto;   /* Прижимаем вправо */
+    margin-right: 0;      /* Убираем правый отступ */
+    margin-bottom: 1rem;  /* Отступ снизу */
+}
+
+/* Стили для личного кабинета */
+.account-container .pdf-card {
+    height: auto;
+    min-height: 80px;
+    padding: 1rem;
+}
+
+.account-container .pdf-card .pdf-info {
+    padding: 0;
+}
+
+.account-container .pdf-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+}
+
+.account-container .pdf-card h4 a {
+    color: var(--text-dark);
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+}
+
+.account-container .pdf-card h4 a:hover {
+    color: var(--dark-blue);
+}
+
+.account-container .pdf-card .pdf-meta {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.account-container .catalog-container {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
