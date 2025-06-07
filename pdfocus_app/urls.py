@@ -7,7 +7,7 @@ from . import views
 urlpatterns = [
     path('', views.main, name='main'),
     path('main/', views.main, name='main'),
-    path('auth/', views.auth, name='auth'),
+    path('auth/', views.auth_view, name='auth'),
     path('upload/', views.upload_pdf, name='upload_pdf'),
     path('detailed/<int:id>', views.get_detailed, name='detailed'),
     path('save-note/', views.save_note, name='save_note'),

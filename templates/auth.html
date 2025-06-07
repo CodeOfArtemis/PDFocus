@@ -52,14 +52,36 @@
             <input type="hidden" name="register-submit" value="1">
             
             {% if register_form.non_field_errors %}
-                <div class="form-errors">
-                    {% for error in register_form.non_field_errors %}
-                        <p>{{ error }}</p>
-                    {% endfor %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in register_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             {% endif %}
 
-            {{ register_form.as_p }}
+            {% for field in register_form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    
+                    {% if field.name == 'username' %}
+                        <input type="text" name="username" class="form-control" id="id_username" required value="{{ register_form.username.value|default_if_none:'' }}">
+                    {% else %}
+                        {{ field }}
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
 
             <button type="submit" class="auth-btn">Зарегистрироваться</button>
         </form>
@@ -76,7 +98,12 @@ function switchTab(tabName) {
     });
 
     document.getElementById(tabName + '-form').classList.add('active');
-    event.currentTarget.classList.add('active');
+    document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const activeTab = '{{ active_tab|default:"login" }}';
+    switchTab(activeTab);
+});
 </script>
 {% endblock %}

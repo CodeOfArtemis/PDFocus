@@ -10,44 +10,48 @@ from django.views.decorators.http import require_POST
 from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text
 
 
-def auth(request):
-    # Если пользователь уже авторизован - перенаправляем
-    if request.user.is_authenticated:
-        return redirect(request.POST.get('next') or 'main')
-
-    # Создаем изменяемые копии POST-данных для модификации
-    login_post_data = request.POST.copy() if request.method == 'POST' else None
-    register_post_data = request.POST.copy() if request.method == 'POST' else None
-
-    # Приводим username к нижнему регистру, если данные отправлены
-    if login_post_data and 'username' in login_post_data:
-        login_post_data['username'] = login_post_data['username'].lower()
+def auth_view(request):
+    # Вкладка по умолчанию
+    active_tab = 'login'
     
-    if register_post_data and 'username' in register_post_data:
-        register_post_data['username'] = register_post_data['username'].lower()
-
-
-    # Инициализация форм
-    login_form = AuthenticationForm(request, data=login_post_data or None)
-    register_form = UserCreationForm(data=register_post_data or None)
+    # Инициализируем пустые формы
+    login_form = AuthenticationForm(request)
+    register_form = UserCreationForm()
 
     if request.method == 'POST':
+        # Данные извлекаются и обрабатываются внутри соответствующих блоков
+
         # Обработка входа
-        if 'login-submit' in request.POST and login_form.is_valid():
-            user = login_form.get_user()
-            login(request, user)
-            return redirect(request.POST.get('next') or 'main')
+        if 'login-submit' in request.POST:
+            active_tab = 'login'
+            # Используем request.POST напрямую, AuthenticationForm сама разберется
+            login_form = AuthenticationForm(request, data=request.POST)
+            if login_form.is_valid():
+                user = login_form.get_user()
+                login(request, user)
+                # 'next' теперь тоже берем напрямую из POST
+                return redirect(request.POST.get('next') or 'main')
 
         # Обработка регистрации
-        if 'register-submit' in request.POST and register_form.is_valid():
-            user = register_form.save()
-            login(request, user)
-            return redirect('main')
+        elif 'register-submit' in request.POST:
+            active_tab = 'register'
+            # Создаем копию данных для модификации
+            register_post_data = request.POST.copy()
+            if 'username' in register_post_data:
+                register_post_data['username'] = register_post_data['username'].lower()
+            
+            register_form = UserCreationForm(data=register_post_data)
+            if register_form.is_valid():
+                user = register_form.save()
+                login(request, user)
+                return redirect('main')
 
     context = {
         'login_form': login_form,
         'register_form': register_form,
-        'next': request.GET.get('next', '')  # Передаем параметр next в шаблон
+        'active_tab': active_tab,
+        # 'next' для GET-запроса, чтобы передать его в POST
+        'next': request.GET.get('next', ''),
     }
     return render(request, 'auth.html', context)
 
