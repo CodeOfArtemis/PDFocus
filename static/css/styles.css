@@ -120,6 +120,18 @@ body {
     font-size: 1.1em;
 }
 
+.logout-form {
+    /* Эти стили больше не нужны, так как форма теперь встраивается в header */
+}
+
+.logout-btn {
+    background: #e74c3c !important; /* Красный цвет для акцента */
+}
+
+.logout-btn:hover {
+    background: #c0392b !important; /* Более темный красный при наведении */
+}
+
 /* Остальные стили */
 header {
     background-color: var(--sky-blue);
