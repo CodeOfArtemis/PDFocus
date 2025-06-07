@@ -7,7 +7,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import PDFUploadForm, NoteForm
 from .models import PDFDocument, Note
 from django.views.decorators.http import require_POST
-from .utils import extract_text_from_pdf
+from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text
 
 
 def auth(request):
@@ -83,7 +83,16 @@ def upload_pdf(request):
         if form.is_valid():
             pdf = form.save(commit=False)
             pdf.user = request.user
+            
+            # Автоматически устанавливаем автора
+            if request.user.get_full_name():
+                pdf.authors = request.user.get_full_name()
+            else:
+                pdf.authors = request.user.username
+
             pdf.extracted_text = extract_text_from_pdf(pdf.file)
+            pdf.keywords = extract_keywords_from_text(pdf.extracted_text)
+            pdf.theme = extract_theme_from_text(pdf.extracted_text)
             pdf.save()
             return JsonResponse({
                 'success': True,
