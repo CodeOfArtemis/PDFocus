@@ -1,3 +1,7 @@
+import * as pdfjsLib from 'https://mozilla.github.io/pdf.js/build/pdf.mjs';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.mjs';
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginForm = document.getElementById('login-form');
 
@@ -123,7 +127,6 @@ function handleFiles(files) {
 // Загрузка PDF для просмотра
 async function loadPdf(url) {
     console.log("Loading PDF from URL:", url);
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.mjs';
     
     try {
         const pdf = await pdfjsLib.getDocument(url).promise;

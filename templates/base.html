@@ -48,7 +48,6 @@
     <div class="main-container" style="{% if not request.user.is_authenticated %}margin-left: 0;{% endif %}">
         {% block content %}{% endblock %}
     </div>
-    <script src="https://mozilla.github.io/pdf.js/build/pdf.mjs" type="module"></script>
-    <script src="{% static 'js/app.js' %}"></script>
+    <script src="{% static 'js/app.js' %}" type="module"></script>
 </body>
 </html>

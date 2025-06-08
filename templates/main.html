@@ -31,26 +31,4 @@
         </div>
     </div>
 </div>
-
-<div class="notes-container" id="notes-container">
-    <div class="notes-header">
-        <h3>Последние заметки</h3>
-        <button class="add-note-btn" onclick="location.href='{% url 'catalog' %}'">
-            Все заметки
-        </button>
-    </div>
-    <div class="notes-list">
-        {% for note in recent_notes %}
-        <div class="note-item">
-            <div class="note-text">{{ note.text }}</div>
-            <div class="note-meta">
-                <span>{{ note.document.title }}</span>
-                <span>Страница {{ note.page_number }}</span>
-            </div>
-        </div>
-        {% empty %}
-        <p>Нет сохраненных заметок</p>
-        {% endfor %}
-    </div>
-</div>
 {% endblock %}

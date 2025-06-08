@@ -63,8 +63,7 @@ def auth_view(request):
 @login_required
 def main(request):
     form = PDFUploadForm()
-    recent_notes = Note.objects.filter(user=request.user).order_by('-created_at')[:5]
-    return render(request, 'main.html', {'form': form, 'recent_notes': recent_notes})
+    return render(request, 'main.html', {'form': form})
 
 
 @login_required
