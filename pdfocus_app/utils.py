@@ -58,6 +58,50 @@ def extract_text_from_pdf(pdf_file):
 
     return text
 
+def extract_text_by_pages(pdf_file):
+    """
+    Извлекает текст из PDF файла по страницам.
+    Возвращает словарь {номер_страницы: текст_страницы}
+    """
+    pages_text = {}
+    temp_dir = tempfile.mkdtemp()
+    temp_pdf_path = os.path.join(temp_dir, 'temp.pdf')
+
+    try:
+        # Сохраняем временный файл
+        with open(temp_pdf_path, 'wb+') as temp_pdf:
+            for chunk in pdf_file.chunks():
+                temp_pdf.write(chunk)
+
+        # Пытаемся извлечь текст напрямую из PDF по страницам
+        with open(temp_pdf_path, 'rb') as f:
+            reader = PyPDF2.PdfReader(f)
+            
+            for page_num, page in enumerate(reader.pages, 1):
+                page_text = page.extract_text() or ""
+                pages_text[page_num] = page_text
+
+        # Если текст не извлекся, используем OCR
+        if not any(text.strip() for text in pages_text.values()):
+            images = convert_from_path(temp_pdf_path)
+            pages_text = {}  # Очищаем предыдущие результаты
+            
+            for i, image in enumerate(images, 1):
+                page_text = pytesseract.image_to_string(image)
+                pages_text[i] = page_text
+
+    except Exception as e:
+        print(f"Error processing PDF by pages: {e}")
+    finally:
+        # Удаляем временные файлы
+        if os.path.exists(temp_dir):
+            for root, dirs, files in os.walk(temp_dir, topdown=False):
+                for name in files:
+                    os.remove(os.path.join(root, name))
+            os.rmdir(temp_dir)
+
+    return pages_text
+
 def extract_keywords_from_text(text):
     """
     Extracts keywords from the given text using YAKE.

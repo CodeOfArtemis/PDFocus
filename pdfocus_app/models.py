@@ -31,6 +31,20 @@ class PDFDocument(models.Model):
         return self.title
 
 
+class PDFPageText(models.Model):
+    document = models.ForeignKey(PDFDocument, on_delete=models.CASCADE, related_name='page_texts')
+    page_number = models.PositiveIntegerField()
+    text_content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['document', 'page_number']
+        ordering = ['page_number']
+
+    def __str__(self):
+        return f"{self.document.title} - Страница {self.page_number}"
+
+
 class Note(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     document = models.ForeignKey(PDFDocument, on_delete=models.CASCADE)

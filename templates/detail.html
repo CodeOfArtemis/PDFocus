@@ -7,7 +7,7 @@
         <h2>{{ pdf.title }}</h2>
     </div>
 
-    <form method="post" class="pdf-meta-form">
+    <form method="post" class="pdf-meta-form" id="pdf-meta-form">
         {% csrf_token %}
         <div class="form-group">
             <label><strong>Автор:</strong></label>
@@ -41,20 +41,40 @@
         </div>
     </form>
 
-    <div class="extracted-text">
-        <h3>Извлеченный текст:</h3>
-        <textarea readonly style="width: 100%; height: 500px">{{ pdf.extracted_text }}</textarea>
+    <div class="pdf-view-container">
+        <div class="pdf-viewer-section">
+            <h3>Просмотр PDF:</h3>
+            <div class="pdf-viewer-wrapper">
+                <div id="pdf-viewer-detail">
+                    <div class="pdf-placeholder" id="pdf-placeholder-detail">
+                        <i>📄</i>
+                        <p>Загрузка PDF...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="extracted-text-section">
+            <h3>Извлеченный текст:</h3>
+            <textarea readonly style="width: 100%; height: 500px">{{ pdf.extracted_text }}</textarea>
+        </div>
+    </div>
+
+    <div class="pdf-controls-detail" id="pdf-controls-detail">
+        <div class="pdf-nav-buttons">
+            <button id="prev-page-detail" class="btn btn-secondary">Предыдущая</button>
+            <span id="page-num-detail">Страница 1 из 1</span>
+            <button id="next-page-detail" class="btn btn-secondary">Следующая</button>
+        </div>
     </div>
 
     <div class="notes-section">
         <h3>Заметки</h3>
-        <form action="{% url 'save_note' %}" method="post" class="note-form">
+        <form method="post" class="note-form" id="note-form-detail">
             {% csrf_token %}
             <input type="hidden" name="document_id" value="{{ pdf.id }}">
-            <div class="form-group">
-                <label for="id_page_number">Номер страницы:</label>
-                <input type="number" name="page_number" id="id_page_number" required min="1" class="page-number-input">
-            </div>
+            <input type="hidden" id="pdf-file-url" value="{{ pdf.file.url }}">
+            <input type="hidden" name="page_number" id="current_page_number" value="1">
             <div class="form-group">
                 <label for="id_note_text">Текст заметки:</label>
                 <textarea name="text" id="id_note_text" placeholder="Введите текст заметки..." required class="note-textarea"></textarea>
@@ -76,4 +96,11 @@
         </div>
     </div>
 </div>
+
+{{ page_texts|json_script:"page-texts-data" }}
+<script>
+// Передаем данные о тексте по страницам в JavaScript
+const pageTextsElement = document.getElementById('page-texts-data');
+window.pageTexts = pageTextsElement ? JSON.parse(pageTextsElement.textContent) : {};
+</script>
 {% endblock %}

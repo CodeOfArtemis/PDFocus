@@ -4,9 +4,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import PDFUploadForm, NoteForm, CustomAuthenticationForm, CustomUserCreationForm
-from .models import PDFDocument, Note
+from .models import PDFDocument, Note, PDFPageText
 from django.views.decorators.http import require_POST
-from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text
+from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text, extract_text_by_pages
 
 
 def auth_view(request):
@@ -76,6 +76,16 @@ def detailed(request, id):
     pdf = get_object_or_404(PDFDocument, id=id, user=request.user)
     notes = Note.objects.filter(document=pdf).order_by('page_number')
     
+    # Получаем текст по страницам (с обработкой ошибки для несуществующей таблицы)
+    page_texts_dict = {}
+    try:
+        page_texts = PDFPageText.objects.filter(document=pdf).order_by('page_number')
+        page_texts_dict = {pt.page_number: pt.text_content for pt in page_texts}
+    except Exception as e:
+        print(f"Error accessing PDFPageText: {e}")
+        # Если таблица не существует, используем общий текст как fallback
+        page_texts_dict = {1: pdf.extracted_text} if pdf.extracted_text else {}
+    
     # Обновляем время последнего доступа
     pdf.save() # Простое сохранение обновит `last_accessed` из-за `auto_now=True`
 
@@ -85,10 +95,22 @@ def detailed(request, id):
         pdf.theme = request.POST.get('theme', '')
         pdf.keywords = request.POST.get('keywords', '')
         pdf.save()
-        messages.success(request, 'Изменения сохранены успешно!')
-        return redirect('detailed', id=pdf.id)
+        
+        # Проверяем, был ли это AJAX-запрос
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Изменения сохранены успешно!'
+            })
+        else:
+            messages.success(request, 'Изменения сохранены успешно!')
+            return redirect('detailed', id=pdf.id)
 
-    return render(request, 'detail.html', {'pdf': pdf, 'notes': notes})
+    return render(request, 'detail.html', {
+        'pdf': pdf, 
+        'notes': notes,
+        'page_texts': page_texts_dict
+    })
 
 @login_required
 def account(request):
@@ -126,10 +148,19 @@ def upload_pdf(request):
                 # Извлекаем текст и метаданные
                 pdf.extracted_text = extract_text_from_pdf(pdf.file)
                 pdf.keywords = extract_keywords_from_text(pdf.extracted_text)
-                pdf.theme = extract_theme_from_text(pdf.extracted_text)
+                # pdf.theme остается пустым для ручного заполнения
                 
                 # Сохраняем документ
                 pdf.save()
+                
+                # Извлекаем и сохраняем текст по страницам
+                pages_text = extract_text_by_pages(pdf.file)
+                for page_num, page_text in pages_text.items():
+                    PDFPageText.objects.create(
+                        document=pdf,
+                        page_number=page_num,
+                        text_content=page_text
+                    )
                 
                 response_data = {
                     'success': True,
@@ -164,10 +195,14 @@ def upload_pdf(request):
 def delete_pdf(request, id):
     document = get_object_or_404(PDFDocument, id=id)
     
+    # Определяем, откуда пришел запрос
+    referer = request.META.get('HTTP_REFERER', '')
+    redirect_url = 'account' if '/account/' in referer else 'catalog'
+    
     # Проверяем, что текущий пользователь является владельцем документа
     if document.user != request.user:
         messages.error(request, "У вас нет прав для удаления этого документа.")
-        return redirect('catalog')
+        return redirect(redirect_url)
 
     if request.method == 'POST':
         # Удаляем связанный файл
@@ -177,10 +212,10 @@ def delete_pdf(request, id):
         document.delete()
         
         messages.success(request, f'Документ "{document.title}" был успешно удален.')
-        return redirect('catalog')
+        return redirect(redirect_url)
     
     # Если это не POST-запрос, просто перенаправляем обратно
-    return redirect('catalog')
+    return redirect(redirect_url)
 
 
 def logout_view(request):

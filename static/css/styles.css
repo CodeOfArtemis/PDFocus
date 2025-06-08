@@ -278,6 +278,76 @@ header {
     gap: 2rem;
 }
 
+.account-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.account-files, .account-notes {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.account-files .pdf-card {
+    display: flex;
+    flex-direction: column;
+    height: 120px; /* Фиксированная высота для карточек */
+}
+
+.account-files .pdf-info {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.account-files .pdf-info h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    flex-grow: 1; /* Заголовок займет все доступное пространство */
+    display: flex;
+    align-items: flex-start;
+}
+
+.account-files .pdf-meta {
+    margin-top: auto; /* Прижимаем к низу */
+    margin-bottom: 0.5rem;
+}
+
+.account-files h3, .account-notes h3 {
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--dark-blue);
+    border-bottom: 2px solid var(--sky-blue);
+    padding-bottom: 0.5rem;
+}
+
+.account-files .pdf-actions {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 1rem;
+}
+
+.account-files .pdf-actions .btn {
+    flex: 1;
+    text-align: center;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    min-height: 32px;
+}
+
+.account-files .pdf-actions form {
+    flex: 1;
+}
+
+.account-files .pdf-actions form .btn {
+    width: 100%;
+}
+
 .user-profile {
     background: white;
     border-radius: var(--border-radius);
@@ -651,6 +721,7 @@ header {
     justify-content: flex-end; /* Выравниваем по правому краю */
     align-items: center;
     gap: 10px;
+    margin-bottom: 1.5rem; /* Отступ снизу от списка заметок */
 }
 
 .notes-list .note-item {
@@ -749,4 +820,90 @@ header {
     align-items: center;
     justify-content: center;
     white-space: nowrap;
+}
+
+/* Стили для страницы детального просмотра PDF */
+.pdf-view-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.pdf-viewer-section, .extracted-text-section {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+}
+
+.pdf-viewer-section h3, .extracted-text-section h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    color: var(--dark-blue);
+    border-bottom: 2px solid var(--sky-blue);
+    padding-bottom: 0.5rem;
+}
+
+.pdf-viewer-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 500px;
+}
+
+#pdf-viewer-detail {
+    background: #e9e9e9;
+    border-radius: var(--border-radius);
+    height: 450px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+#pdf-viewer-detail canvas {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+}
+
+.pdf-controls-detail {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.pdf-controls-detail .pdf-nav-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 600px;
+}
+
+.pdf-controls-detail .btn {
+    min-width: 150px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    flex: 1;
+}
+
+.pdf-controls-detail span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 200px;
+    height: 40px;
+    font-weight: 500;
+    color: var(--dark-blue);
+    flex: 1;
+    text-align: center;
 }

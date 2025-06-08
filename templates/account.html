@@ -21,40 +21,49 @@
     </div>
 
     <div class="account-content">
-        <section class="account-notes">
-            <h3>Последние заметки</h3>
-            <div class="notes-list">
-                {% for note in notes %}
-                <div class="note-item">
-                    <div class="note-text">{{ note.text }}</div>
-                    <div class="note-meta">
-                        <span>{{ note.document.title }}</span>
-                        <span>Страница {{ note.page_number }}</span>
-                    </div>
-                </div>
-                {% empty %}
-                <p>У вас пока нет заметок.</p>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section>
-            <h3>Последние файлы</h3>
-            <div class="catalog-container">
-                {% for doc in documents %}
-                <div class="pdf-card small">
-                    <div class="pdf-info">
-                        <h4><a href="{% url 'detailed' doc.id %}">{{ doc.title }}</a></h4>
-                        <div class="pdf-meta">
-                            <span>Открыт: {{ doc.last_accessed|date:"d.m.Y H:i" }}</span>
+        <div class="account-columns">
+            <section class="account-files">
+                <h3>Последние файлы</h3>
+                <div class="catalog-container">
+                    {% for doc in documents %}
+                    <div class="pdf-card small">
+                        <div class="pdf-info">
+                            <h4><a href="{% url 'detailed' doc.id %}">{{ doc.title }}</a></h4>
+                            <div class="pdf-meta">
+                                <span>Открыт: {{ doc.last_accessed|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            <div class="pdf-actions">
+                                <a href="{% url 'detailed' doc.id %}" class="btn btn-primary">Открыть</a>
+                                <form action="{% url 'delete_pdf' doc.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот файл?');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                </form>
+                            </div>
                         </div>
                     </div>
+                    {% empty %}
+                    <p>У вас пока нет файлов.</p>
+                    {% endfor %}
                 </div>
-                {% empty %}
-                <p>У вас пока нет файлов.</p>
-                {% endfor %}
-            </div>
-        </section>
+            </section>
+
+            <section class="account-notes">
+                <h3>Последние заметки</h3>
+                <div class="notes-list">
+                    {% for note in notes %}
+                    <div class="note-item">
+                        <div class="note-text">{{ note.text }}</div>
+                        <div class="note-meta">
+                            <span>{{ note.document.title }}</span>
+                            <span>Страница {{ note.page_number }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>У вас пока нет заметок.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
     </div>
 </div>
 {% endblock %}
