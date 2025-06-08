@@ -26,6 +26,7 @@ class PDFDocument(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
     last_accessed = models.DateTimeField(auto_now=True)
     thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
+    is_published = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title

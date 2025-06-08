@@ -24,6 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
     initDetailPagePdf();
 });
 
+// Делаем функцию доступной глобально для использования в других шаблонах
+window.initDetailPagePdf = initDetailPagePdf;
+
 // Инициализация drag-and-drop
 function initDragAndDrop() {
     const uploadArea = document.getElementById('upload-area');

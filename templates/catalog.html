@@ -15,14 +15,25 @@
         </div>
         <div class="pdf-info">
             <h3>{{ document.title }}</h3>
+            {% if document.user != request.user %}
+                <div class="public-badge-small">
+                    <span class="badge badge-public-small">Публичный</span>
+                </div>
+            {% endif %}
             <div class="pdf-meta">
                 <span>{{ document.authors }}</span>
                 <span>{{ document.upload_date|date:"d.m.Y" }}</span>
             </div>
             <div class="pdf-actions">
-                <a href="{% url 'detailed' document.id %}" class="btn btn-primary" style="width: 100%;">
-                    Открыть
-                </a>
+                {% if document.user == request.user %}
+                    <a href="{% url 'detailed' document.id %}" class="btn btn-primary" style="width: 100%;">
+                        Открыть
+                    </a>
+                {% else %}
+                    <a href="{% url 'public_detail' document.id %}" class="btn btn-primary" style="width: 100%;">
+                        Просмотреть
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>

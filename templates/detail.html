@@ -36,7 +36,9 @@
         <div class="form-actions">
             <button type="submit" class="btn btn-success">Сохранить изменения</button>
             <a href="{{ pdf.file.url }}" class="btn btn-primary" download>Скачать PDF</a>
-            <button type="button" class="btn btn-primary">Опубликовать</button>
+            <button type="button" class="btn btn-primary" id="publish-btn" data-document-id="{{ pdf.id }}" data-is-published="{{ pdf.is_published|yesno:'true,false' }}">
+                {% if pdf.is_published %}Скрыть{% else %}Опубликовать{% endif %}
+            </button>
         </div>
     </form>
 
@@ -104,5 +106,43 @@
 // Передаем данные о тексте по страницам в JavaScript
 const pageTextsElement = document.getElementById('page-texts-data');
 window.pageTexts = pageTextsElement ? JSON.parse(pageTextsElement.textContent) : {};
+
+// Инициализация кнопки публикации
+function initPublishButton() {
+    const publishBtn = document.getElementById('publish-btn');
+    if (publishBtn) {
+        publishBtn.addEventListener('click', function() {
+            const documentId = this.dataset.documentId;
+            const isPublished = this.dataset.isPublished === 'true';
+            
+            fetch(`/publish/${documentId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем кнопку
+                    this.dataset.isPublished = data.is_published;
+                    this.textContent = data.is_published ? 'Скрыть' : 'Опубликовать';
+                    
+                    // Показываем уведомление
+                    showNotification(data.message, 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка при изменении статуса публикации', 'error');
+            });
+        });
+    }
+}
+
+// Инициализируем кнопку публикации при загрузке страницы
+document.addEventListener('DOMContentLoaded', initPublishButton);
 </script>
 {% endblock %}

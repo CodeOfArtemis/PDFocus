@@ -68,8 +68,15 @@ def main(request):
 
 @login_required
 def catalog(request):
-    documents = PDFDocument.objects.filter(user=request.user)
-    return render(request, 'catalog.html', {'documents': documents})
+    # Показываем свои документы + опубликованные документы других пользователей
+    user_documents = PDFDocument.objects.filter(user=request.user)
+    published_documents = PDFDocument.objects.filter(is_published=True).exclude(user=request.user)
+    
+    # Объединяем и сортируем по дате загрузки
+    all_documents = list(user_documents) + list(published_documents)
+    all_documents.sort(key=lambda x: x.upload_date, reverse=True)
+    
+    return render(request, 'catalog.html', {'documents': all_documents})
 
 @login_required
 def detailed(request, id):
@@ -286,3 +293,45 @@ def delete_note(request, id):
         else:
             messages.error(request, f'Ошибка при удалении заметки: {e}')
             return redirect('detailed', id=request.POST.get('document_id', '/catalog/'))
+
+
+@login_required
+def publish_document(request, id):
+    """Toggle publish status of a document"""
+    document = get_object_or_404(PDFDocument, id=id, user=request.user)
+    
+    if request.method == 'POST':
+        # Переключаем статус публикации
+        document.is_published = not document.is_published
+        document.save()
+        
+        # AJAX-ответ
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'is_published': document.is_published,
+                'message': 'Документ опубликован!' if document.is_published else 'Документ скрыт!'
+            })
+    
+    # Если не AJAX, редирект назад
+    return redirect('detailed', id=document.id)
+
+
+@login_required  
+def public_detail(request, id):
+    """Просмотр опубликованного документа (только чтение)"""
+    pdf = get_object_or_404(PDFDocument, id=id, is_published=True)
+    
+    # Получаем текст по страницам
+    page_texts_dict = {}
+    try:
+        page_texts = PDFPageText.objects.filter(document=pdf).order_by('page_number')
+        page_texts_dict = {pt.page_number: pt.text_content for pt in page_texts}
+    except Exception as e:
+        page_texts_dict = {1: pdf.extracted_text} if pdf.extracted_text else {}
+    
+    return render(request, 'public_detail.html', {
+        'pdf': pdf,
+        'page_texts': page_texts_dict,
+        'is_readonly': True
+    })
