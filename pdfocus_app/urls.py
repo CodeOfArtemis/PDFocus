@@ -11,6 +11,7 @@ urlpatterns = [
     path('upload/', views.upload_pdf, name='upload_pdf'),
     path('detailed/<int:id>', views.detailed, name='detailed'),
     path('save-note/', views.save_note, name='save_note'),
+    path('delete-note/<int:id>/', views.delete_note, name='delete_note'),
     path('catalog/', views.catalog, name='catalog'),
     path('account/', views.account, name='account'),
     path('delete_pdf/<int:id>/', views.delete_pdf, name='delete_pdf'),

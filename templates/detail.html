@@ -2,7 +2,6 @@
 
 {% block content %}
 <div class="card">
-    <a href="{% url 'catalog' %}" class="btn btn-secondary back-to-catalog-btn">Назад к каталогу</a>
     <div class="detail-header">
         <h2>{{ pdf.title }}</h2>
     </div>
@@ -86,9 +85,12 @@
 
         <div class="notes-list">
             {% for note in notes %}
-            <div class="note-item">
-                <p class="note-text">{{ note.text }}</p>
-                <span class="note-meta">Стр. {{ note.page_number }} - {{ note.created_at|date:"d.m.Y H:i" }}</span>
+            <div class="note-item" data-note-id="{{ note.id }}">
+                <div class="note-content">
+                    <p class="note-text">{{ note.text }}</p>
+                    <span class="note-meta">Стр. {{ note.page_number }} - {{ note.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                <button class="note-delete-btn" data-note-id="{{ note.id }}" title="Удалить заметку">✕</button>
             </div>
             {% empty %}
             <p>К этому документу пока нет заметок.</p>

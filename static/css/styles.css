@@ -730,6 +730,36 @@ header {
     border-radius: var(--border-radius);
     margin-bottom: 1rem;
     border-left: 4px solid var(--sky-blue);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.note-content {
+    flex: 1;
+}
+
+.note-delete-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.note-delete-btn:hover {
+    background: #c0392b;
+    transform: scale(1.1);
 }
 
 .note-item .note-text {

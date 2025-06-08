@@ -242,6 +242,7 @@ def save_note(request):
             return JsonResponse({
                 'success': True,
                 'note': {
+                    'id': note.id,
                     'text': note.text,
                     'page_number': note.page_number,
                     'created_at': note.created_at.strftime("%d.%m.%Y %H:%M")
@@ -255,3 +256,33 @@ def save_note(request):
     # (здесь можно сделать более сложную обработку, но для начала так)
     messages.error(request, 'Ошибка при добавлении заметки.')
     return redirect('detailed', id=request.POST.get('document_id'))
+
+
+@login_required
+def delete_note(request, id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Метод не поддерживается'}, status=405)
+    
+    try:
+        note = get_object_or_404(Note, id=id, user=request.user)
+        
+        # Проверяем, был ли это AJAX-запрос
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            note.delete()
+            return JsonResponse({
+                'success': True,
+                'message': 'Заметка успешно удалена.'
+            })
+        else:
+            # Для обычных запросов
+            document_id = note.document.id
+            note.delete()
+            messages.success(request, 'Заметка успешно удалена.')
+            return redirect('detailed', id=document_id)
+    except Exception as e:
+        print(f"Error deleting note {id}: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        else:
+            messages.error(request, f'Ошибка при удалении заметки: {e}')
+            return redirect('detailed', id=request.POST.get('document_id', '/catalog/'))

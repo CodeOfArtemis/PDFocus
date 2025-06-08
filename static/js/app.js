@@ -291,6 +291,7 @@ function initDetailPagePdf() {
     initDetailPdfNavigation();
     initDetailNoteForm();
     initDetailMetaForm();
+    initDetailNoteDelete();
 }
 
 // Загрузка PDF для детального просмотра
@@ -490,13 +491,23 @@ function addDetailNoteToUI(note) {
 
     const noteElement = document.createElement('div');
     noteElement.className = 'note-item';
+    noteElement.setAttribute('data-note-id', note.id);
     noteElement.innerHTML = `
-        <p class="note-text">${note.text}</p>
-        <span class="note-meta">Стр. ${note.page_number} - ${note.created_at}</span>
+        <div class="note-content">
+            <p class="note-text">${note.text}</p>
+            <span class="note-meta">Стр. ${note.page_number} - ${note.created_at}</span>
+        </div>
+        <button class="note-delete-btn" data-note-id="${note.id}" title="Удалить заметку">✕</button>
     `;
 
     // Добавляем в начало списка
     notesContainer.insertBefore(noteElement, notesContainer.firstChild);
+    
+    // Добавляем обработчик удаления для новой заметки
+    const deleteBtn = noteElement.querySelector('.note-delete-btn');
+    deleteBtn.addEventListener('click', function() {
+        deleteDetailNote(note.id, noteElement);
+    });
 }
 
 // Показ уведомления об успехе
@@ -568,5 +579,94 @@ function saveDetailMetadata() {
     .catch(error => {
         console.error('Error:', error);
         alert('Ошибка при сохранении метаданных: ' + error.message);
+    });
+}
+
+// Инициализация кнопок удаления заметок
+function initDetailNoteDelete() {
+    const deleteButtons = document.querySelectorAll('.note-delete-btn');
+    console.log('Found delete buttons:', deleteButtons.length);
+    
+    deleteButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const noteId = this.getAttribute('data-note-id');
+            const noteElement = this.closest('.note-item');
+            
+            console.log('Delete button clicked, noteId:', noteId, 'element:', noteElement);
+            
+            if (!noteId) {
+                console.error('No note ID found on button:', this);
+                alert('Ошибка: не удалось найти ID заметки');
+                return;
+            }
+            
+            deleteDetailNote(noteId, noteElement);
+        });
+    });
+}
+
+// Удаление заметки через AJAX
+function deleteDetailNote(noteId, noteElement) {
+    console.log('Attempting to delete note with ID:', noteId);
+    
+    if (!noteId || noteId === 'undefined') {
+        console.error('Invalid note ID:', noteId);
+        alert('Ошибка: не удалось получить ID заметки');
+        return;
+    }
+    
+    if (!confirm('Вы уверены, что хотите удалить эту заметку?')) {
+        return;
+    }
+
+    const formData = new FormData();
+    
+    fetch(`${window.location.origin}/delete-note/${noteId}/`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        console.log('Delete response status:', response.status);
+        if (!response.ok) {
+            return response.text().then(text => {
+                console.error('Server response:', text);
+                throw new Error(`Ошибка удаления заметки (${response.status})`);
+            });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Плавно скрываем заметку
+            noteElement.style.transition = 'opacity 0.3s ease';
+            noteElement.style.opacity = '0';
+            
+            setTimeout(() => {
+                noteElement.remove();
+                
+                // Проверяем, остались ли заметки
+                const notesContainer = document.querySelector('.notes-list');
+                const remainingNotes = notesContainer.querySelectorAll('.note-item');
+                
+                if (remainingNotes.length === 0) {
+                    const noNotesMessage = document.createElement('p');
+                    noNotesMessage.textContent = 'К этому документу пока нет заметок.';
+                    notesContainer.appendChild(noNotesMessage);
+                }
+            }, 300);
+            
+            showSuccessMessage('Заметка успешно удалена!');
+        } else {
+            throw new Error(data.error || 'Неизвестная ошибка');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Ошибка при удалении заметки: ' + error.message);
     });
 }
