@@ -24,6 +24,7 @@ class PDFDocument(models.Model):
     file = models.FileField(upload_to=user_pdf_path)
     extracted_text = models.TextField()
     upload_date = models.DateTimeField(auto_now_add=True)
+    last_accessed = models.DateTimeField(auto_now=True)
     thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
 
     def __str__(self):

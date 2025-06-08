@@ -21,26 +21,10 @@
     </div>
 
     <div class="account-content">
-        <section>
-            <h3>Последние файлы</h3>
-            <div class="catalog-container">
-                {% for doc in documents|slice:":3" %}
-                <div class="pdf-card small">
-                    <div class="pdf-info">
-                        <h4>{{ doc.title }}</h4>
-                        <div class="pdf-meta">
-                            <span>{{ doc.upload_date|date:"d.m.Y" }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-        </section>
-
         <section class="account-notes">
             <h3>Последние заметки</h3>
             <div class="notes-list">
-                {% for note in notes|slice:":5" %}
+                {% for note in notes %}
                 <div class="note-item">
                     <div class="note-text">{{ note.text }}</div>
                     <div class="note-meta">
@@ -48,6 +32,26 @@
                         <span>Страница {{ note.page_number }}</span>
                     </div>
                 </div>
+                {% empty %}
+                <p>У вас пока нет заметок.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section>
+            <h3>Последние файлы</h3>
+            <div class="catalog-container">
+                {% for doc in documents %}
+                <div class="pdf-card small">
+                    <div class="pdf-info">
+                        <h4><a href="{% url 'detailed' doc.id %}">{{ doc.title }}</a></h4>
+                        <div class="pdf-meta">
+                            <span>Открыт: {{ doc.last_accessed|date:"d.m.Y H:i" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <p>У вас пока нет файлов.</p>
                 {% endfor %}
             </div>
         </section>

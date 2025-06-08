@@ -74,8 +74,12 @@ def catalog(request):
     return render(request, 'catalog.html', {'documents': documents})
 
 @login_required
-def detailed(request, pk):
-    pdf = get_object_or_404(PDFDocument, pk=pk)
+def detailed(request, id):
+    pdf = get_object_or_404(PDFDocument, id=id, user=request.user)
+    notes = Note.objects.filter(document=pdf).order_by('page_number')
+    
+    # Обновляем время последнего доступа
+    pdf.save() # Простое сохранение обновит `last_accessed` из-за `auto_now=True`
 
     if request.method == 'POST':
         pdf.authors = request.POST.get('authors', '')
@@ -84,83 +88,78 @@ def detailed(request, pk):
         pdf.keywords = request.POST.get('keywords', '')
         pdf.save()
         messages.success(request, 'Изменения сохранены успешно!')
-        return redirect('detailed', pk=pdf.id)
+        return redirect('detailed', id=pdf.id)
 
-    return render(request, 'detail.html', {'pdf': pdf})
+    return render(request, 'detail.html', {'pdf': pdf, 'notes': notes})
+
 @login_required
 def account(request):
-    documents = PDFDocument.objects.filter(user=request.user)
-    notes = Note.objects.filter(user=request.user)
+    recent_documents = PDFDocument.objects.filter(user=request.user).order_by('-last_accessed')[:100]
+    recent_notes = Note.objects.filter(user=request.user).order_by('-created_at')[:100]
     return render(request, 'account.html', {
-        'documents': documents,
-        'notes': notes
+        'documents': recent_documents,
+        'notes': recent_notes
     })
 
 
 @login_required
 def upload_pdf(request):
     if request.method == 'POST':
-        form = PDFUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            pdf = form.save(commit=False)
-            pdf.user = request.user
-            
-            # Автоматически устанавливаем автора
-            if request.user.get_full_name():
-                pdf.authors = request.user.get_full_name()
-            else:
-                pdf.authors = request.user.username
-
-            pdf.extracted_text = extract_text_from_pdf(pdf.file)
-            pdf.keywords = extract_keywords_from_text(pdf.extracted_text)
-            pdf.theme = extract_theme_from_text(pdf.extracted_text)
-            pdf.save()
-            return JsonResponse({
-                'success': True,
-                'file_url': pdf.file.url
-            }, content_type="application/json")
-    else:
-        form = PDFUploadForm()
-    return redirect('main')
-
-
-@login_required
-def get_detailed(request, id):
-    pdf = PDFDocument.objects.get(id=id)
-    return render(request, 'detail.html', context={'pdf': pdf})
-
-
-@login_required
-@require_POST
-def save_note(request):
-    form = NoteForm(request.POST)
-
-    if form.is_valid():
         try:
-            note = form.save(commit=False)
-            note.user = request.user
+            # Создаем данные для формы
+            post_data = {
+                'title': request.FILES['file'].name if 'title' not in request.POST else request.POST['title'],
+                'doc_type': request.POST.get('doc_type', 'other')
+            }
+            
+            # Создаем форму с данными и файлом
+            form = PDFUploadForm(post_data, request.FILES)
+            
+            if form.is_valid():
+                pdf = form.save(commit=False)
+                pdf.user = request.user
+                
+                # Автоматически устанавливаем автора
+                if request.user.get_full_name():
+                    pdf.authors = request.user.get_full_name()
+                else:
+                    pdf.authors = request.user.username
 
-            # Получаем связанный PDF документ
-            document_id = request.POST.get('document_id')
-            if document_id:
-                note.document = PDFDocument.objects.get(id=document_id, user=request.user)
-
-            note.save()
-
-            return JsonResponse({
-                'success': True,
-                'note': {
-                    'text': note.text,
-                    'page_number': note.page_number,
-                    'created_at': note.created_at.strftime("%d.%m.%Y %H:%M")
+                # Извлекаем текст и метаданные
+                pdf.extracted_text = extract_text_from_pdf(pdf.file)
+                pdf.keywords = extract_keywords_from_text(pdf.extracted_text)
+                pdf.theme = extract_theme_from_text(pdf.extracted_text)
+                
+                # Сохраняем документ
+                pdf.save()
+                
+                response_data = {
+                    'success': True,
+                    'file_url': pdf.file.url,
+                    'document_id': pdf.id
                 }
-            })
+                print("Response data:", response_data)
+                return JsonResponse(response_data)
+            else:
+                print("Form errors:", form.errors)
+                return JsonResponse({
+                    'success': False,
+                    'error': 'Ошибка валидации формы',
+                    'details': form.errors
+                }, status=400)
+                
         except Exception as e:
+            print("Error processing upload:", str(e))
             return JsonResponse({
                 'success': False,
-                'error': f'Ошибка сохранения заметки: {str(e)}'
+                'error': 'Ошибка при обработке файла',
+                'details': str(e)
             }, status=500)
-    return None
+    
+    return JsonResponse({
+        'success': False,
+        'error': 'Метод не поддерживается'
+    }, status=405)
 
 
 @login_required
@@ -190,3 +189,36 @@ def logout_view(request):
     from django.contrib.auth import logout
     logout(request)
     return redirect('auth')
+
+
+@login_required
+@require_POST
+def save_note(request):
+    form = NoteForm(request.POST)
+
+    if form.is_valid():
+        note = form.save(commit=False)
+        note.user = request.user
+        document_id = request.POST.get('document_id')
+        if document_id:
+            note.document = get_object_or_404(PDFDocument, id=document_id, user=request.user)
+            note.save()
+
+        # Проверяем, был ли это AJAX-запрос или обычная отправка формы
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'note': {
+                    'text': note.text,
+                    'page_number': note.page_number,
+                    'created_at': note.created_at.strftime("%d.%m.%Y %H:%M")
+                }
+            })
+        else:
+            messages.success(request, 'Заметка успешно добавлена.')
+            return redirect('detailed', id=document_id)
+
+    # Если форма невалидна, возвращаемся назад с сообщением об ошибке
+    # (здесь можно сделать более сложную обработку, но для начала так)
+    messages.error(request, 'Ошибка при добавлении заметки.')
+    return redirect('detailed', id=request.POST.get('document_id'))

@@ -744,3 +744,34 @@ header {
 .account-container .catalog-container {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
+
+.pdf-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.pdf-action-buttons .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-actions .btn {
+    padding: 0.5rem 1rem;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+}

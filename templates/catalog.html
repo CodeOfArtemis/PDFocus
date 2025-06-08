@@ -14,15 +14,15 @@
             {% endif %}
         </div>
         <div class="pdf-info">
-            <div class="pdf-content">
-                <h3 class="pdf-title">{{ document.title }}</h3>
-                <div class="pdf-meta">
-                    <span class="author">{{ document.authors }}</span>
-                    <span class="date">{{ document.upload_date|date:"d.m.Y" }}</span>
-                </div>
+            <h3>{{ document.title }}</h3>
+            <div class="pdf-meta">
+                <span>{{ document.authors }}</span>
+                <span>{{ document.upload_date|date:"d.m.Y" }}</span>
             </div>
             <div class="pdf-actions">
-                <a href="{% url 'detailed' document.id %}" class="btn btn-primary">Открыть</a>
+                <a href="{% url 'detailed' document.id %}" class="btn btn-primary">
+                    Открыть
+                </a>
                 <form action="{% url 'delete_pdf' document.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот файл?');">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Удалить</button>

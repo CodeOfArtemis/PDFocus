@@ -21,12 +21,13 @@
     </div>
     <div class="pdf-controls" id="pdf-controls" style="display: none;">
         <div class="pdf-nav-buttons">
-            <button id="prev-page">Предыдущая</button>
+            <button id="prev-page" class="btn btn-secondary">Предыдущая</button>
             <span id="page-num">Страница 1 из 1</span>
-            <button id="next-page">Следующая</button>
+            <button id="next-page" class="btn btn-secondary">Следующая</button>
         </div>
-        <div>
-            <button id="close-pdf" onclick="location.reload()">Закрыть PDF</button>
+        <div class="pdf-action-buttons">
+            <a href="#" id="open-pdf" class="btn btn-primary" style="display: none;">Открыть в редакторе</a>
+            <button id="close-pdf" class="btn btn-secondary">Закрыть</button>
         </div>
     </div>
 </div>

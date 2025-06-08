@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let currentPdf = null;
 let currentPage = 1;
 let totalPages = 1;
+let currentDocumentId = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     initDragAndDrop();
@@ -57,7 +58,11 @@ function handleFiles(files) {
     for (let i = 0; i < files.length; i++) {
         if (files[i].type === 'application/pdf') {
             formData.append('file', files[i]);
-            formData.append('title', files[i].name)
+            formData.append('title', files[i].name);
+            formData.append('doc_type', 'other');
+            formData.append('authors', '');
+            formData.append('theme', '');
+            formData.append('keywords', '');
             hasPdf = true;
         }
     }
@@ -67,40 +72,79 @@ function handleFiles(files) {
         return;
     }
 
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
     // Отправка на сервер
     fetch(`${window.location.origin}/upload/`, {
         method: 'POST',
         body: formData,
         headers: {
-            'X-CSRFToken': document.getElementsByName('csrfmiddlewaretoken').item(0).value,
+            'X-CSRFToken': csrfToken,
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(data => {
+                throw new Error(data.error || `HTTP error! status: ${response.status}`);
+            });
         }
-    }).then(response => {
-        if (response.ok) {
             return response.json();
-        }
-        throw new Error('Ошибка загрузки файла');
-    }).then(data => {
+    })
+    .then(data => {
+        console.log("Received data:", data);
         if (data.success) {
-            loadPdf(data.file_url);
+            currentDocumentId = data.document_id;
+            const openButton = document.getElementById('open-pdf');
+            if (openButton) {
+                const detailUrl = `${window.location.origin}/detailed/${data.document_id}`;
+                openButton.href = detailUrl;
+                openButton.style.display = 'block';
+                console.log("Open button updated:", openButton.href);
+
+                // Загружаем PDF только после успешного обновления кнопки
+                loadPdf(data.file_url).catch(error => {
+                    console.error("Error loading PDF:", error);
+                    // Даже если PDF не загрузился, кнопка "Открыть" все равно будет работать
+                });
+            } else {
+                console.error("Open button not found");
+            }
+        } else {
+            throw new Error(data.error || 'Неизвестная ошибка');
         }
-    }).catch(error => {
+    })
+    .catch(error => {
         console.error('Error:', error);
-        alert('Ошибка при загрузке файла');
+        alert('Ошибка при загрузке файла: ' + error.message);
     });
 }
 
 // Загрузка PDF для просмотра
-function loadPdf(url) {
+async function loadPdf(url) {
+    console.log("Loading PDF from URL:", url);
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.mjs';
-    pdfjsLib.getDocument(url).promise.then(function(pdf) {
+    
+    try {
+        const pdf = await pdfjsLib.getDocument(url).promise;
         currentPdf = pdf;
         totalPages = pdf.numPages;
         currentPage = 1;
 
-        document.getElementById('pdf-controls').style.display = 'flex';
-        document.getElementById('pdf-placeholder').style.display = 'none';
-        renderPage(currentPage);
-    });
+        const controls = document.getElementById('pdf-controls');
+        const placeholder = document.getElementById('pdf-placeholder');
+        
+        if (controls && placeholder) {
+            controls.style.display = 'flex';
+            placeholder.style.display = 'none';
+            await renderPage(1);
+        } else {
+            throw new Error("Controls or placeholder elements not found");
+        }
+    } catch (error) {
+        console.error("Error loading PDF:", error);
+        throw error; // Пробрасываем ошибку дальше для обработки
+    }
 }
 
 // Рендеринг страницы PDF
