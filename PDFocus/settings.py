@@ -85,9 +85,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'pdfocus_app.custom_validators.CustomMinimumLengthValidator',
     },
     {
-        'NAME': 'pdfocus_app.custom_validators.CustomCommonPasswordValidator',
-    },
-    {
         'NAME': 'pdfocus_app.custom_validators.CustomNumericPasswordValidator',
     },
 ]

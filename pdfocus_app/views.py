@@ -2,9 +2,8 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .forms import PDFUploadForm, NoteForm
+from .forms import PDFUploadForm, NoteForm, CustomAuthenticationForm, CustomUserCreationForm
 from .models import PDFDocument, Note
 from django.views.decorators.http import require_POST
 from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text
@@ -15,8 +14,8 @@ def auth_view(request):
     active_tab = 'login'
     
     # Инициализируем пустые формы
-    login_form = AuthenticationForm(request)
-    register_form = UserCreationForm()
+    login_form = CustomAuthenticationForm(request)
+    register_form = CustomUserCreationForm()
 
     if request.method == 'POST':
         # Данные извлекаются и обрабатываются внутри соответствующих блоков
@@ -30,7 +29,7 @@ def auth_view(request):
             if 'username' in login_post_data:
                 login_post_data['username'] = login_post_data['username'].lower()
 
-            login_form = AuthenticationForm(request, data=login_post_data)
+            login_form = CustomAuthenticationForm(request, data=login_post_data)
             if login_form.is_valid():
                 user = login_form.get_user()
                 login(request, user)
@@ -45,7 +44,7 @@ def auth_view(request):
             if 'username' in register_post_data:
                 register_post_data['username'] = register_post_data['username'].lower()
             
-            register_form = UserCreationForm(data=register_post_data)
+            register_form = CustomUserCreationForm(data=register_post_data)
             if register_form.is_valid():
                 user = register_form.save()
                 login(request, user)
