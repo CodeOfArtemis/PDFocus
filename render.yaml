@@ -4,11 +4,11 @@ services:
     env: python
     buildCommand: |
       pip install -r requirements.txt
-      python manage.py makemigrations 
+      python manage.py makemigrations
+      python manage.py migrate
     startCommand: |
       export PYTHONPATH=/opt/render/project/src
       cd /opt/render/project/src
-      python manage.py migrate 
       gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
