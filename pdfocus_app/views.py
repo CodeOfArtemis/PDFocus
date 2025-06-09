@@ -7,6 +7,7 @@ from .forms import PDFUploadForm, NoteForm, CustomAuthenticationForm, CustomUser
 from .models import PDFDocument, Note, PDFPageText
 from django.views.decorators.http import require_POST
 from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text, extract_text_by_pages
+from django.db import models
 
 
 def auth_view(request):
@@ -335,3 +336,6 @@ def public_detail(request, id):
         'page_texts': page_texts_dict,
         'is_readonly': True
     })
+
+
+

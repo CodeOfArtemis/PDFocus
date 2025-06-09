@@ -124,10 +124,10 @@ def extract_keywords_from_text(text):
     if not cleaned_text:
         return ""
 
-    language = "ru"
-    max_ngram_size = 1
+    language = "en"  # Используем английский как более универсальный
+    max_ngram_size = 2  # Увеличиваем для лучшего извлечения составных терминов
     deduplication_threshold = 0.7  # Уменьшен для лучшей дедупликации
-    num_of_keywords = 15  # Увеличено, т.к. будет дополнительная фильтрация
+    num_of_keywords = 20  # Увеличено, т.к. будет дополнительная фильтрация
 
     custom_kw_extractor = yake.KeywordExtractor(
         lan=language,
@@ -140,10 +140,12 @@ def extract_keywords_from_text(text):
     keywords = custom_kw_extractor.extract_keywords(cleaned_text)
     
     # Постобработка ключевых слов
-    processed_keywords = postprocess_keywords([kw for kw, score in keywords])
+    raw_keywords = [kw for kw, score in keywords]
+    processed_keywords = postprocess_keywords(raw_keywords)
     
     # Возвращаем топ-10 после обработки
-    return ", ".join(processed_keywords[:10])
+    result = ", ".join(processed_keywords[:10])
+    return result
 
 
 def preprocess_text_for_keywords(text):
@@ -225,17 +227,28 @@ def postprocess_keywords(keywords):
         if len(keyword) < 3:
             continue
             
-        # Простая дедупликация по корню слова (первые 4 символа)
-        root = keyword[:4]
+        # Простая дедупликация по корню слова (первые 4 символа для длинных слов)
+        root_length = min(4, len(keyword) - 1) if len(keyword) > 4 else len(keyword)
+        root = keyword[:root_length].lower()
         if root in seen_roots:
             continue
             
-        # Дополнительная фильтрация
-        if not re.match(r'^[а-яё]+$', keyword):  # Только русские буквы
-            continue
-            
-        processed.append(keyword)
-        seen_roots.add(root)
+        # Разбиваем составные фразы на отдельные слова
+        words_in_keyword = keyword.split()
+        added_word = False
+        for word in words_in_keyword:
+            word = word.strip()
+            if len(word) < 3:
+                continue
+            # Принимаем только русские и английские слова
+            if re.match(r'^[а-яёa-z]+$', word, re.IGNORECASE):
+                word_root = word[:min(4, len(word) - 1)] if len(word) > 4 else word
+                word_root = word_root.lower()
+                if word_root not in seen_roots:
+                    processed.append(word.lower())
+                    seen_roots.add(word_root)
+                    added_word = True
+                    break  # Берем только первое подходящее слово из фразы
     
     return processed
 

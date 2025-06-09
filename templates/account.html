@@ -26,12 +26,18 @@
                 <h3>Последние файлы</h3>
                 <div class="catalog-container">
                     {% for doc in documents %}
-                    <div class="pdf-card small">
+                    <div class="pdf-card small" data-search-title="{{ doc.title|lower }}" data-search-authors="{{ doc.authors|lower }}" data-search-theme="{{ doc.theme|default:''|lower }}" data-search-keywords="{{ doc.keywords|default:''|lower }}">
                         <div class="pdf-info">
                             <h4><a href="{% url 'detailed' doc.id %}">{{ doc.title }}</a></h4>
                             <div class="pdf-meta">
-                                <span>Открыт: {{ doc.last_accessed|date:"d.m.Y H:i" }}</span>
+                                <span>{{ doc.authors }} • Открыт: {{ doc.last_accessed|date:"d.m.Y H:i" }}</span>
                             </div>
+                            {% if doc.theme %}
+                                <div class="document-theme" style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0.3rem; font-style: italic;">{{ doc.theme|truncatechars:60 }}</div>
+                            {% endif %}
+                            {% if doc.keywords %}
+                                <div class="document-keywords" style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.3rem;"><strong>Ключевые слова:</strong> {{ doc.keywords|truncatechars:40 }}</div>
+                            {% endif %}
                             <div class="pdf-actions">
                                 <a href="{% url 'detailed' doc.id %}" class="btn btn-primary">Открыть</a>
                                 <form action="{% url 'delete_pdf' doc.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот файл?');">

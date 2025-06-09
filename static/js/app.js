@@ -17,11 +17,61 @@ let currentPage = 1;
 let totalPages = 1;
 let currentDocumentId = null;
 
+// Проверка доступности PDF.js
+function checkPdfJsAvailability() {
+    if (typeof pdfjsLib === 'undefined') {
+        console.error('PDF.js is not loaded! PDF preview will not work.');
+        return false;
+    }
+    console.log('PDF.js is available, version:', pdfjsLib.version || 'unknown');
+    return true;
+}
+
+// Fallback для отображения PDF без предпросмотра
+function showPdfFallback(url) {
+    console.log("Using PDF fallback for URL:", url);
+    
+    const viewer = document.getElementById('pdf-viewer');
+    if (viewer) {
+        viewer.innerHTML = `
+            <div class="pdf-placeholder" style="display: flex;">
+                <i>📄</i>
+                <h3>PDF загружен успешно</h3>
+                <p>Предпросмотр недоступен. <a href="${url}" target="_blank">Открыть PDF в новой вкладке</a></p>
+            </div>
+        `;
+    }
+    
+    // Показываем кнопки управления с ограниченным функционалом
+    const controls = document.getElementById('pdf-controls');
+    if (controls) {
+        controls.style.display = 'flex';
+        const pageNum = document.getElementById('page-num');
+        if (pageNum) pageNum.textContent = 'PDF готов к просмотру';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM loaded, initializing application...");
+    
+    // Диагностика PDF.js
+    setTimeout(() => {
+        console.log("=== PDF.js Diagnostic ===");
+        console.log("typeof pdfjsLib:", typeof pdfjsLib);
+        if (typeof pdfjsLib !== 'undefined') {
+            console.log("PDF.js version:", pdfjsLib.version);
+            console.log("Worker src:", pdfjsLib.GlobalWorkerOptions.workerSrc);
+        } else {
+            console.error("❌ PDF.js is not loaded!");
+        }
+        console.log("========================");
+    }, 1000); // Проверяем через секунду после загрузки
+    
     initDragAndDrop();
     initPdfNavigation();
     initNoteForm();
     initDetailPagePdf();
+    initSearch();
 });
 
 // Делаем функцию доступной глобально для использования в других шаблонах
@@ -100,7 +150,7 @@ function handleFiles(files) {
             return response.json();
     })
     .then(data => {
-        console.log("Received data:", data);
+
         if (data.success) {
             currentDocumentId = data.document_id;
             const openButton = document.getElementById('open-pdf');
@@ -108,13 +158,51 @@ function handleFiles(files) {
                 const detailUrl = `${window.location.origin}/detailed/${data.document_id}`;
                 openButton.href = detailUrl;
                 openButton.style.display = 'block';
-                console.log("Open button updated:", openButton.href);
 
-                // Загружаем PDF только после успешного обновления кнопки
+
+                            // Небольшая задержка для полной загрузки DOM
+            setTimeout(() => {
+                // Проверяем, есть ли на странице элементы для предпросмотра
+                const viewer = document.getElementById('pdf-viewer');
+                const controls = document.getElementById('pdf-controls');
+                const placeholder = document.getElementById('pdf-placeholder');
+                
+
+                
+                if (viewer && controls && placeholder) {
+                // Сбрасываем состояние перед новой загрузкой
+                controls.style.display = 'none';
+                placeholder.style.display = 'flex';
+                viewer.innerHTML = '';
+                
+                // Загружаем PDF
                 loadPdf(data.file_url).catch(error => {
-                    console.error("Error loading PDF:", error);
-                    // Даже если PDF не загрузился, кнопка "Открыть" все равно будет работать
+                    console.error("Error loading PDF for preview:", error);
+                    console.log("PDF URL that failed:", data.file_url);
+                    
+                    // Пробуем использовать простой iframe viewer
+                    try {
+                        if (typeof window.showSimplePdfViewer === 'function') {
+                            window.showSimplePdfViewer(data.file_url);
+                            console.log("Simple PDF viewer loaded successfully");
+                        } else {
+                            showPdfFallback(data.file_url);
+                            console.log("PDF fallback displayed successfully");
+                        }
+                    } catch (fallbackError) {
+                        console.error("Fallback also failed:", fallbackError);
+                        // Сбрасываем состояние при полном провале
+                        controls.style.display = 'none';
+                        placeholder.style.display = 'flex';
+                        viewer.innerHTML = '';
+                        // Показываем пользователю, что предпросмотр недоступен, но файл загружен
+                        alert('Файл успешно загружен! Предпросмотр недоступен, но вы можете открыть документ в редакторе.');
+                    }
                 });
+                } else {
+                    console.log("No PDF viewer elements on this page. Skipping preview.");
+                }
+            }, 100); // Задержка 100мс
             } else {
                 console.error("Open button not found");
             }
@@ -130,26 +218,47 @@ function handleFiles(files) {
 
 // Загрузка PDF для просмотра
 async function loadPdf(url) {
-    console.log("Loading PDF from URL:", url);
+
+    
+    // Проверяем, есть ли нужные элементы на странице
+    const viewer = document.getElementById('pdf-viewer');
+    const controls = document.getElementById('pdf-controls');
+    const placeholder = document.getElementById('pdf-placeholder');
+    
+
+    
+    if (!viewer || !controls || !placeholder) {
+        console.log("PDF viewer elements not found on this page. Skipping PDF.js loading.");
+        throw new Error('PDF viewer elements not available on this page');
+    }
+    
+    // Проверяем доступность PDF.js
+    if (!checkPdfJsAvailability()) {
+        throw new Error('PDF.js is not available');
+    }
     
     try {
         const pdf = await pdfjsLib.getDocument(url).promise;
+        
         currentPdf = pdf;
         totalPages = pdf.numPages;
         currentPage = 1;
 
-        const controls = document.getElementById('pdf-controls');
-        const placeholder = document.getElementById('pdf-placeholder');
-        
-        if (controls && placeholder) {
+        // Показываем контролы и скрываем placeholder
             controls.style.display = 'flex';
             placeholder.style.display = 'none';
             await renderPage(1);
-        } else {
-            throw new Error("Controls or placeholder elements not found");
-        }
+        
     } catch (error) {
-        console.error("Error loading PDF:", error);
+        console.error("Detailed error loading PDF:", error);
+        console.error("Error type:", error.name);
+        console.error("Error message:", error.message);
+        if (error.stack) console.error("Error stack:", error.stack);
+        
+        // Восстанавливаем placeholder если произошла ошибка
+        if (controls) controls.style.display = 'none';
+        if (placeholder) placeholder.style.display = 'flex';
+        
         throw error; // Пробрасываем ошибку дальше для обработки
     }
 }
@@ -160,6 +269,9 @@ function renderPage(pageNum) {
 
     currentPdf.getPage(pageNum).then(function(page) {
         const viewer = document.getElementById('pdf-viewer');
+        if (!viewer) return;
+        
+        // Очищаем содержимое viewer'а
         viewer.innerHTML = '';
 
         const scale = 1.5;
@@ -179,8 +291,12 @@ function renderPage(pageNum) {
             viewport: viewport
         });
 
-        document.getElementById('page-num').textContent =
-            `Страница ${pageNum} из ${totalPages}`;
+        const pageNumElement = document.getElementById('page-num');
+        if (pageNumElement) {
+            pageNumElement.textContent = `Страница ${pageNum} из ${totalPages}`;
+        }
+    }).catch(error => {
+        console.error('Error rendering page:', error);
     });
 }
 
@@ -201,10 +317,25 @@ function initPdfNavigation() {
     });
 
     document.getElementById('close-pdf')?.addEventListener('click', function() {
+        // Полная очистка состояния
         currentPdf = null;
-        document.getElementById('pdf-viewer').innerHTML = '';
-        document.getElementById('pdf-controls').style.display = 'none';
-        document.getElementById('pdf-placeholder').style.display = 'flex';
+        currentPage = 1;
+        totalPages = 1;
+        currentDocumentId = null;
+        
+        // Очистка интерфейса
+        const viewer = document.getElementById('pdf-viewer');
+        if (viewer) viewer.innerHTML = '';
+        
+        const controls = document.getElementById('pdf-controls');
+        if (controls) controls.style.display = 'none';
+        
+        const placeholder = document.getElementById('pdf-placeholder');
+        if (placeholder) placeholder.style.display = 'flex';
+        
+        // Скрываем кнопку "Открыть в редакторе"
+        const openButton = document.getElementById('open-pdf');
+        if (openButton) openButton.style.display = 'none';
     });
 }
 
@@ -672,4 +803,120 @@ function deleteDetailNote(noteId, noteElement) {
         console.error('Error:', error);
         alert('Ошибка при удалении заметки: ' + error.message);
     });
+}
+
+// Инициализация поиска
+function initSearch() {
+    const searchInput = document.querySelector('.search-bar input');
+    
+    if (!searchInput) return;
+    
+    let searchTimeout;
+    
+    // Поиск при вводе (с задержкой)
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        const query = this.value.trim();
+        
+        if (query.length === 0) {
+            showAllDocuments();
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            filterDocuments(query);
+        }, 300); // Задержка 300мс
+    });
+    
+    // Поиск по Enter
+    searchInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const query = this.value.trim();
+            filterDocuments(query);
+        }
+    });
+}
+
+// Фильтрация документов на странице
+function filterDocuments(query) {
+    const documentCards = document.querySelectorAll('.pdf-card, .document-card');
+    const noResultsElement = document.querySelector('.no-search-results');
+    let visibleCount = 0;
+    
+    if (query.length === 0) {
+        showAllDocuments();
+        return;
+    }
+    
+    const searchQuery = query.toLowerCase();
+    
+    documentCards.forEach(card => {
+        // Используем data-атрибуты если есть, иначе берем из текста
+        const title = card.dataset.searchTitle || card.querySelector('h3, h4')?.textContent?.toLowerCase() || '';
+        const authors = card.dataset.searchAuthors || card.querySelector('.pdf-meta span, .document-authors')?.textContent?.toLowerCase() || '';
+        const theme = card.dataset.searchTheme || card.querySelector('.document-theme')?.textContent?.toLowerCase() || '';
+        const keywords = card.dataset.searchKeywords || card.querySelector('.document-keywords')?.textContent?.toLowerCase() || '';
+        
+        const isMatch = title.includes(searchQuery) || 
+                       authors.includes(searchQuery) || 
+                       theme.includes(searchQuery) || 
+                       keywords.includes(searchQuery);
+        
+        if (isMatch) {
+            card.style.display = '';
+            card.style.opacity = '1';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Показать/скрыть сообщение "Ничего не найдено"
+    showNoResultsMessage(visibleCount === 0, query);
+}
+
+// Показать все документы
+function showAllDocuments() {
+    const documentCards = document.querySelectorAll('.pdf-card, .document-card');
+    const noResultsElement = document.querySelector('.no-search-results');
+    
+    documentCards.forEach(card => {
+        card.style.display = '';
+    });
+    
+    // Скрыть сообщение "Ничего не найдено"
+    if (noResultsElement) {
+        noResultsElement.remove();
+    }
+}
+
+// Показать сообщение "Ничего не найдено"
+function showNoResultsMessage(show, query) {
+    let noResultsElement = document.querySelector('.no-search-results');
+    
+    if (show && !noResultsElement) {
+        const container = document.querySelector('.catalog-container, .account-files');
+        if (container) {
+            noResultsElement = document.createElement('div');
+            noResultsElement.className = 'no-search-results';
+            noResultsElement.innerHTML = `
+                <div class="empty-state">
+                    <i>🔍</i>
+                    <h3>Ничего не найдено</h3>
+                    <p>По запросу "${escapeHtml(query)}" документы не найдены</p>
+                </div>
+            `;
+            container.appendChild(noResultsElement);
+        }
+    } else if (!show && noResultsElement) {
+        noResultsElement.remove();
+    }
+}
+
+// Экранирование HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
