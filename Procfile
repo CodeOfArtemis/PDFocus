@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT --workers 4 --forwarded-allow-ips="*" --proxy-protocol 
+web: python manage.py makemigrations && python manage.py migrate --noinput && gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT --workers 4 --forwarded-allow-ips="*" --proxy-protocol 
