@@ -7,7 +7,7 @@ services:
       pip install -r requirements.txt
     startCommand: |
       python manage.py migrate
-      gunicorn wsgi:application --bind 0.0.0.0:$PORT --workers 4
+      gunicorn wsgi:application --bind 0.0.0.0:$PORT --workers 4 --forwarded-allow-ips="*"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
@@ -21,6 +21,8 @@ services:
           property: connectionString
       - key: PORT
         value: 10000
+      - key: DEBUG
+        value: "False"
 
 databases:
   - name: pdfocus-db
