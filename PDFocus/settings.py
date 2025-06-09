@@ -72,7 +72,7 @@ DATABASES = {
         'NAME': 'database_pc01',
         'USER': 'database_pc01_user',
         'PASSWORD': 'dFhnNFkVhWnMsNlISeNvOlg3BZPIPzZR',
-        'HOST': 'postgresql://database_pc01_user:dFhnNFkVhWnMsNlISeNvOlg3BZPIPzZR@dpg-d1352615pdvs73dbi7tg-a.oregon-postgres.render.com/database_pc01',
+        'HOST': 'dpg-d1352615pdvs73dbi7tg-a.oregon-postgres.render.com',
         'PORT': '5432',
     }
 }
