@@ -4,12 +4,19 @@ services:
     env: python
     buildCommand: pip install -r requirements.txt
     startCommand: |
-      python manage.py migrate auth
-      python manage.py migrate admin
-      python manage.py migrate sessions
-      python manage.py migrate contenttypes
-      python manage.py migrate pdfocus_app
-      python manage.py migrate
+      python manage.py migrate auth zero --noinput
+      python manage.py migrate admin zero --noinput
+      python manage.py migrate sessions zero --noinput
+      python manage.py migrate contenttypes zero --noinput
+      python manage.py migrate pdfocus_app zero --noinput
+      python manage.py migrate --noinput
+      python manage.py migrate auth --noinput
+      python manage.py migrate admin --noinput
+      python manage.py migrate sessions --noinput
+      python manage.py migrate contenttypes --noinput
+      python manage.py migrate pdfocus_app --noinput
+      python manage.py migrate --noinput
+      python manage.py createsuperuser --noinput --username admin --email admin@example.com || true
       cd /opt/render/project/src && PYTHONPATH=/opt/render/project/src gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
