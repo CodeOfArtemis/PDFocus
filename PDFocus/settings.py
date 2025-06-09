@@ -26,6 +26,15 @@ DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['78.106.55.219', '127.0.0.1', '45.67.231.146', '.onrender.com']
 
+# Настройки безопасности
+SECURE_SSL_REDIRECT = not DEBUG
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = 31536000  # 1 год
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
