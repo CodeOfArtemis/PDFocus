@@ -5,7 +5,7 @@ import os
 import PyPDF2
 from PIL import Image
 from PDFocus import settings
-import yake
+from keybert import KeyBERT
 import nltk
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
@@ -31,6 +31,10 @@ download_nltk_data_if_missing('stopwords', 'corpora')
 
 if hasattr(settings, 'PYTESSERACT_PATH'):
     pytesseract.pytesseract.tesseract_cmd = settings.PYTESSERACT_PATH
+
+# Инициализируем KeyBERT один раз при загрузке модуля
+kw_model = KeyBERT()
+
 def extract_text_from_pdf(pdf_file):
     text = ""
     temp_dir = tempfile.mkdtemp()
@@ -112,7 +116,7 @@ def extract_text_by_pages(pdf_file):
 
 def extract_keywords_from_text(text):
     """
-    Улучшенное извлечение ключевых слов с лемматизацией и фильтрацией стоп-слов.
+    Извлекает ключевые слова из текста с помощью KeyBERT.
     Returns a comma-separated string of keywords.
     """
     if not text:
@@ -124,29 +128,26 @@ def extract_keywords_from_text(text):
     if not cleaned_text:
         return ""
 
-    language = "en"  # Используем английский как более универсальный
-    max_ngram_size = 2  # Увеличиваем для лучшего извлечения составных терминов
-    deduplication_threshold = 0.7  # Уменьшен для лучшей дедупликации
-    num_of_keywords = 20  # Увеличено, т.к. будет дополнительная фильтрация
-
-    custom_kw_extractor = yake.KeywordExtractor(
-        lan=language,
-        n=max_ngram_size,
-        dedupLim=deduplication_threshold,
-        top=num_of_keywords,
-        features=None
-    )
-
-    keywords = custom_kw_extractor.extract_keywords(cleaned_text)
-    
-    # Постобработка ключевых слов
-    raw_keywords = [kw for kw, score in keywords]
-    processed_keywords = postprocess_keywords(raw_keywords)
-    
-    # Возвращаем топ-10 после обработки
-    result = ", ".join(processed_keywords[:10])
-    return result
-
+    try:
+        # Извлекаем ключевые слова с помощью KeyBERT
+        keywords = kw_model.extract_keywords(
+            cleaned_text,
+            keyphrase_ngram_range=(1, 2),  # Одиночные слова и биграммы
+            stop_words='english',  # Используем английские стоп-слова
+            top_n=20,  # Количество ключевых слов
+            diversity=0.7  # Разнообразие ключевых слов
+        )
+        
+        # Постобработка ключевых слов
+        raw_keywords = [kw for kw, score in keywords]
+        processed_keywords = postprocess_keywords(raw_keywords)
+        
+        # Возвращаем топ-10 после обработки
+        result = ", ".join(processed_keywords[:10])
+        return result
+    except Exception as e:
+        print(f"Error extracting keywords: {e}")
+        return ""
 
 def preprocess_text_for_keywords(text):
     """
@@ -168,7 +169,19 @@ def preprocess_text_for_keywords(text):
     except:
         # Базовый набор русских стоп-слов если NLTK недоступен
         russian_stopwords = {
-            'и', 'в', 'во', 'не', 'что', 'он', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она', 'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее', 'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда', 'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до', 'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей', 'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем', 'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет', 'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь', 'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем', 'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после', 'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много', 'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда', 'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю', 'между'
+            'и', 'в', 'во', 'не', 'что', 'он', 'на', 'я', 'с', 'со', 'как', 'а', 'то', 'все', 'она',
+            'так', 'его', 'но', 'да', 'ты', 'к', 'у', 'же', 'вы', 'за', 'бы', 'по', 'только', 'ее',
+            'мне', 'было', 'вот', 'от', 'меня', 'еще', 'нет', 'о', 'из', 'ему', 'теперь', 'когда',
+            'даже', 'ну', 'вдруг', 'ли', 'если', 'уже', 'или', 'ни', 'быть', 'был', 'него', 'до',
+            'вас', 'нибудь', 'опять', 'уж', 'вам', 'ведь', 'там', 'потом', 'себя', 'ничего', 'ей',
+            'может', 'они', 'тут', 'где', 'есть', 'надо', 'ней', 'для', 'мы', 'тебя', 'их', 'чем',
+            'была', 'сам', 'чтоб', 'без', 'будто', 'чего', 'раз', 'тоже', 'себе', 'под', 'будет',
+            'ж', 'тогда', 'кто', 'этот', 'того', 'потому', 'этого', 'какой', 'совсем', 'ним', 'здесь',
+            'этом', 'один', 'почти', 'мой', 'тем', 'чтобы', 'нее', 'сейчас', 'были', 'куда', 'зачем',
+            'всех', 'никогда', 'можно', 'при', 'наконец', 'два', 'об', 'другой', 'хоть', 'после',
+            'над', 'больше', 'тот', 'через', 'эти', 'нас', 'про', 'всего', 'них', 'какая', 'много',
+            'разве', 'три', 'эту', 'моя', 'впрочем', 'хорошо', 'свою', 'этой', 'перед', 'иногда',
+            'лучше', 'чуть', 'том', 'нельзя', 'такой', 'им', 'более', 'всегда', 'конечно', 'всю'
         }
     
     # Добавляем дополнительные стоп-слова
@@ -208,7 +221,6 @@ def preprocess_text_for_keywords(text):
             filtered_words.append(word)
     
     return ' '.join(filtered_words)
-
 
 def postprocess_keywords(keywords):
     """
