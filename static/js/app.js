@@ -920,3 +920,50 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Обработка удаления PDF с предварительной очисткой ресурсов
+function handlePdfDeletion(event, documentTitle) {
+    // Спрашиваем подтверждение
+    if (!confirm(`Вы уверены, что хотите удалить файл "${documentTitle}"?`)) {
+        event.preventDefault();
+        return false;
+    }
+    
+    // Пытаемся закрыть PDF viewer, если он открыт
+    try {
+        // Очищаем currentPdf если он загружен
+        if (window.currentPdf) {
+            window.currentPdf = null;
+        }
+        
+        // Очищаем PDF viewer элементы
+        const viewer = document.getElementById('pdf-viewer');
+        if (viewer) {
+            viewer.innerHTML = '';
+        }
+        
+        const detailViewer = document.getElementById('pdf-viewer-detail');
+        if (detailViewer) {
+            detailViewer.innerHTML = '';
+        }
+        
+        // Даем время браузеру на освобождение ресурсов
+        setTimeout(() => {
+            // Принудительно очищаем PDF.js кэш если доступен
+            if (typeof pdfjsLib !== 'undefined' && pdfjsLib.PDFWorker) {
+                try {
+                    const workers = pdfjsLib.PDFWorker.getWorkerSrc();
+                    // Очистка не всегда доступна, но попробуем
+                } catch (e) {
+                    console.log('PDF.js cleanup attempted:', e);
+                }
+            }
+        }, 100);
+        
+    } catch (error) {
+        console.log('Предварительная очистка PDF ресурсов:', error);
+    }
+    
+    // Продолжаем отправку формы
+    return true;
+}

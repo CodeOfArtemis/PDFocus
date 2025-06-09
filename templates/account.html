@@ -40,7 +40,7 @@
                             {% endif %}
                             <div class="pdf-actions">
                                 <a href="{% url 'detailed' doc.id %}" class="btn btn-primary">Открыть</a>
-                                <form action="{% url 'delete_pdf' doc.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот файл?');">
+                                <form action="{% url 'delete_pdf' doc.id %}" method="post" onsubmit="return handlePdfDeletion(event, '{{ doc.title }}');">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-danger">Удалить</button>
                                 </form>

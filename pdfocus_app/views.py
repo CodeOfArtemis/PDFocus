@@ -201,6 +201,9 @@ def upload_pdf(request):
 
 @login_required
 def delete_pdf(request, id):
+    import time
+    import os
+    
     document = get_object_or_404(PDFDocument, id=id)
     
     # Определяем, откуда пришел запрос
@@ -213,13 +216,51 @@ def delete_pdf(request, id):
         return redirect(redirect_url)
 
     if request.method == 'POST':
-        # Удаляем связанный файл
-        document.file.delete(save=False) # save=False, т.к. мы удалим объект целиком
+        document_title = document.title
         
-        # Удаляем объект из базы данных
+        # Попытка удаления файла с retry механизмом
+        file_deleted = False
+        if document.file:
+            for attempt in range(3):  # 3 попытки
+                try:
+                    # Сначала закрываем все возможные дескрипторы
+                    if hasattr(document.file.file, 'close'):
+                        document.file.file.close()
+                    
+                    # Пытаемся удалить файл
+                    document.file.delete(save=False)
+                    file_deleted = True
+                    break
+                    
+                except PermissionError as e:
+                    print(f"Попытка {attempt + 1}: Файл заблокирован - {e}")
+                    if attempt < 2:  # Если не последняя попытка
+                        time.sleep(0.5)  # Ждем 500мс
+                        continue
+                    else:
+                        # На последней попытке пробуем альтернативный способ
+                        try:
+                            file_path = document.file.path
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                            file_deleted = True
+                        except Exception as alt_error:
+                            print(f"Альтернативное удаление также не удалось: {alt_error}")
+                            # Файл не удалился, но продолжаем удаление записи из БД
+                            break
+                            
+                except Exception as e:
+                    print(f"Неожиданная ошибка при удалении файла: {e}")
+                    break
+        
+        # Удаляем объект из базы данных (даже если файл не удалился)
         document.delete()
         
-        messages.success(request, f'Документ "{document.title}" был успешно удален.')
+        if file_deleted:
+            messages.success(request, f'Документ "{document_title}" был успешно удален.')
+        else:
+            messages.warning(request, f'Документ "{document_title}" удален из системы, но файл может остаться на диске (файл был заблокирован браузером).')
+        
         return redirect(redirect_url)
     
     # Если это не POST-запрос, просто перенаправляем обратно
