@@ -10,3 +10,4 @@ nltk>=3.6.0
 pymorphy2>=0.9.1 
 gunicorn==23.0.0
 PyPDF2==3.0.1
+whitenoise==6.6.0
