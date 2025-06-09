@@ -6,6 +6,7 @@ import PyPDF2
 from PIL import Image
 from PDFocus import settings
 from keybert import KeyBERT
+from sentence_transformers import SentenceTransformer
 import nltk
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
@@ -32,8 +33,9 @@ download_nltk_data_if_missing('stopwords', 'corpora')
 if hasattr(settings, 'PYTESSERACT_PATH'):
     pytesseract.pytesseract.tesseract_cmd = settings.PYTESSERACT_PATH
 
-# Инициализируем KeyBERT один раз при загрузке модуля
-kw_model = KeyBERT()
+# Инициализируем легкую модель для KeyBERT
+model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+kw_model = KeyBERT(model=model)
 
 def extract_text_from_pdf(pdf_file):
     text = ""
@@ -129,21 +131,28 @@ def extract_keywords_from_text(text):
         return ""
 
     try:
+        # Ограничиваем длину текста для экономии памяти
+        max_text_length = 10000  # Примерно 2000 слов
+        if len(cleaned_text) > max_text_length:
+            cleaned_text = cleaned_text[:max_text_length]
+
         # Извлекаем ключевые слова с помощью KeyBERT
         keywords = kw_model.extract_keywords(
             cleaned_text,
             keyphrase_ngram_range=(1, 2),  # Одиночные слова и биграммы
             stop_words='english',  # Используем английские стоп-слова
-            top_n=20,  # Количество ключевых слов
-            diversity=0.7  # Разнообразие ключевых слов
+            top_n=10,  # Уменьшаем количество ключевых слов
+            diversity=0.7,  # Разнообразие ключевых слов
+            use_maxsum=True,  # Используем более эффективный алгоритм
+            nr_candidates=20  # Ограничиваем количество кандидатов
         )
         
         # Постобработка ключевых слов
         raw_keywords = [kw for kw, score in keywords]
         processed_keywords = postprocess_keywords(raw_keywords)
         
-        # Возвращаем топ-10 после обработки
-        result = ", ".join(processed_keywords[:10])
+        # Возвращаем топ-5 после обработки
+        result = ", ".join(processed_keywords[:5])
         return result
     except Exception as e:
         print(f"Error extracting keywords: {e}")
