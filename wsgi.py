@@ -2,7 +2,8 @@ import os
 import sys
 
 # Добавляем путь к проекту в PYTHONPATH
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+current_path = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(current_path)
 
 from django.core.wsgi import get_wsgi_application
 
