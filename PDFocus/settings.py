@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-&#95sx2o4=((tr8up9z78z+zz%vjk4ym(v26(+eyvyhk=82q7_
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['78.106.55.219', '127.0.0.1', '45.67.231.146']
+ALLOWED_HOSTS = ['78.106.55.219', '127.0.0.1', '45.67.231.146', 'PDFocus.onrender.com']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -69,10 +69,10 @@ WSGI_APPLICATION = 'PDFocus.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'database',
-        'USER': 'postgres',
-        'PASSWORD': 'TheVoid22@',
-        'HOST': 'localhost',
+        'NAME': 'database_pc01',
+        'USER': 'database_pc01_user',
+        'PASSWORD': 'dFhnNFkVhWnMsNlISeNvOlg3BZPIPzZR',
+        'HOST': 'dpg-c970000-a.oregon-postgres.render.com',
         'PORT': '5432',
     }
 }

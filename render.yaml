@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: pdfocus
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+    startCommand: |
+      python manage.py makemigrations
+      python manage.py migrate
+      export PYTHONPATH=/opt/render/project/src
+      cd /opt/render/project/src
+      gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.1
+      - key: DATABASE_URL
+        fromDatabase:
+          name: pdfocus-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DJANGO_SETTINGS_MODULE
+        value: PDFocus.settings
+      - key: PYTHONPATH
+        value: "/opt/render/project/src"
+      - key: RENDER
+        value: "true"
+
+databases:
+  - name: pdfocus-db
+    databaseName: database_pc01
+    user: database_pc01_user 
