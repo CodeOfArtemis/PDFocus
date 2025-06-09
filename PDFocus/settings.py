@@ -84,10 +84,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'PDFocus.wsgi.application'
 
+# Настройки базы данных
+DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://postgres:111@localhost:5432/database')
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', 'postgres://postgres:111@localhost:5432/database'),
-        conn_max_age=600
+        default=DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=not DEBUG
     )
 }
 
