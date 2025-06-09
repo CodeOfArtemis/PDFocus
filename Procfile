@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT 
+web: cd /opt/render/project/src && python manage.py migrate && gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT 

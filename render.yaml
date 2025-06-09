@@ -6,6 +6,7 @@ services:
       pip install --upgrade pip
       pip install -r requirements.txt
     startCommand: |
+      cd /opt/render/project/src
       python manage.py migrate
       gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
