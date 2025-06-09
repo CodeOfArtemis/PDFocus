@@ -8,19 +8,7 @@ services:
     startCommand: |
       export PYTHONPATH=/opt/render/project/src
       cd /opt/render/project/src
-      python manage.py migrate auth zero --noinput || true
-      python manage.py migrate admin zero --noinput || true
-      python manage.py migrate sessions zero --noinput || true
-      python manage.py migrate contenttypes zero --noinput || true
-      python manage.py migrate pdfocus_app zero --noinput || true
-      python manage.py migrate --noinput || true
-      python manage.py migrate auth --noinput
-      python manage.py migrate admin --noinput
-      python manage.py migrate sessions --noinput
-      python manage.py migrate contenttypes --noinput
-      python manage.py migrate pdfocus_app --noinput
-      python manage.py migrate --noinput
-      python manage.py createsuperuser --noinput --username admin --email admin@example.com || true
+      python manage.py migrate 
       gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
@@ -35,12 +23,6 @@ services:
         value: 4
       - key: DJANGO_SETTINGS_MODULE
         value: PDFocus.settings
-      - key: DJANGO_SUPERUSER_PASSWORD
-        value: "your-secure-password-here"
-      - key: DJANGO_SUPERUSER_USERNAME
-        value: "admin"
-      - key: DJANGO_SUPERUSER_EMAIL
-        value: "admin@example.com"
       - key: PYTHONPATH
         value: "/opt/render/project/src"
       - key: RENDER
