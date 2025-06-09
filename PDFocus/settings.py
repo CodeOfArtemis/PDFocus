@@ -24,7 +24,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-&#95sx2o4=((tr8up9z78
 
 DEBUG = os.environ.get('DEBUG', 'False') == 'False'
 
-ALLOWED_HOSTS = ['78.106.55.219', '127.0.0.1', '45.67.231.146', '.onrender.com', 'localhost']
+ALLOWED_HOSTS = ['78.106.55.219', '127.0.0.1', '45.67.231.146', 'PDFocus.onrender.com', 'localhost']
 
 # Настройки безопасности
 if not DEBUG:
