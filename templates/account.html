@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="account-container">
+    <div class="user-profile">
+        <div class="user-avatar">{{ user.username|slice:":2"|upper }}</div>
+        <h3>{{ user.get_full_name|default:user.username }}</h3>
+        <p>Пользователь с {{ user.date_joined|date:"d.m.Y" }}</p>
+
+        <div class="user-stats">
+            <div class="stat-item">
+                <span>Файлов:</span>
+                <span>{{ documents.count }}</span>
+            </div>
+            <div class="stat-item">
+                <span>Заметок:</span>
+                <span>{{ notes.count }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="account-content">
+        <div class="account-columns">
+            <section class="account-files">
+                <h3>Последние файлы</h3>
+                <div class="catalog-container">
+                    {% for doc in documents %}
+                    <div class="pdf-card small" data-search-title="{{ doc.title|lower }}" data-search-authors="{{ doc.authors|lower }}" data-search-theme="{{ doc.theme|default:''|lower }}" data-search-keywords="{{ doc.keywords|default:''|lower }}">
+                        <div class="pdf-info">
+                            <h4><a href="{% url 'detailed' doc.id %}">{{ doc.title }}</a></h4>
+                            <div class="pdf-meta">
+                                <span>{{ doc.authors }} • Открыт: {{ doc.last_accessed|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            {% if doc.theme %}
+                                <div class="document-theme" style="font-size: 0.8rem; color: #6c757d; margin-bottom: 0.3rem; font-style: italic;">{{ doc.theme|truncatechars:60 }}</div>
+                            {% endif %}
+                            {% if doc.keywords %}
+                                <div class="document-keywords" style="font-size: 0.75rem; color: #6c757d; margin-bottom: 0.3rem;"><strong>Ключевые слова:</strong> {{ doc.keywords|truncatechars:40 }}</div>
+                            {% endif %}
+                            <div class="pdf-actions">
+                                <a href="{% url 'detailed' doc.id %}" class="btn btn-primary">Открыть</a>
+                                <form action="{% url 'delete_pdf' doc.id %}" method="post" onsubmit="return handlePdfDeletion(event, '{{ doc.title }}');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-danger">Удалить</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>У вас пока нет файлов.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <section class="account-notes">
+                <h3>Последние заметки</h3>
+                <div class="notes-list">
+                    {% for note in notes %}
+                    <div class="note-item">
+                        <div class="note-text">{{ note.text }}</div>
+                        <div class="note-meta">
+                            <span>{{ note.document.title }}</span>
+                            <span>Страница {{ note.page_number }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p>У вас пока нет заметок.</p>
+                    {% endfor %}
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+{% endblock %}

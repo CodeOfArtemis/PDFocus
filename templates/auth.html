@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="auth-page">
+    <div class="auth-container">
+        <div class="auth-tabs">
+            <button class="tab active" onclick="switchTab('login')">Вход</button>
+            <button class="tab" onclick="switchTab('register')">Регистрация</button>
+        </div>
+
+        <!-- Форма входа -->
+        <form method="post" action="{% url 'auth' %}" id="login-form" class="auth-form active">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+            <input type="hidden" name="login-submit" value="1">
+
+            {% if login_form.non_field_errors %}
+                <div class="form-errors">
+                    {% for error in login_form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {{ login_form.username.label_tag }}
+            {{ login_form.username }}
+            {% if login_form.username.errors %}
+                <div class="field-errors">
+                    {% for error in login_form.username.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {{ login_form.password.label_tag }}
+            {{ login_form.password }}
+            {% if login_form.password.errors %}
+                <div class="field-errors">
+                    {% for error in login_form.password.errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary">Войти</button>
+        </form>
+
+        <!-- Форма регистрации -->
+        <form method="post" id="register-form" class="auth-form">
+            {% csrf_token %}
+            <input type="hidden" name="register-submit" value="1">
+            
+            {% if register_form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <ul>
+                        {% for error in register_form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% for field in register_form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="alert alert-danger">
+                            <ul>
+                                {% for error in field.errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function switchTab(tabName) {
+    document.querySelectorAll('.auth-form').forEach(form => {
+        form.classList.remove('active');
+    });
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+
+    document.getElementById(tabName + '-form').classList.add('active');
+    document.querySelector(`.tab[onclick="switchTab('${tabName}')"]`).classList.add('active');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const activeTab = '{{ active_tab|default:"login" }}';
+    switchTab(activeTab);
+});
+</script>
+{% endblock %}

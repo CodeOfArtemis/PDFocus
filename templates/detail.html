@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="detail-header">
+        <h2>{{ pdf.title }}</h2>
+    </div>
+
+    <form method="post" class="pdf-meta-form" id="pdf-meta-form">
+        {% csrf_token %}
+        <div class="form-group">
+            <label><strong>Автор:</strong></label>
+            <input type="text" name="authors" value="{{ pdf.authors }}" class="editable-field">
+        </div>
+
+        <div class="form-group">
+            <label><strong>Тип:</strong></label>
+            <select name="doc_type" class="editable-field">
+                <option value="Книга" {% if pdf.doc_type == "Книга" %}selected{% endif %}>Книга</option>
+                <option value="Статья" {% if pdf.doc_type == "Статья" %}selected{% endif %}>Статья</option>
+                <option value="Отчет" {% if pdf.doc_type == "Отчет" %}selected{% endif %}>Отчет</option>
+                <option value="Другое" {% if pdf.doc_type == "Другое" %}selected{% endif %}>Другое</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label><strong>Тема:</strong></label>
+            <input type="text" name="theme" value="{{ pdf.theme }}" class="editable-field">
+        </div>
+
+        <div class="form-group">
+            <label><strong>Ключевые слова:</strong></label>
+            <input type="text" name="keywords" value="{{ pdf.keywords }}" class="editable-field">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-success">Сохранить изменения</button>
+            <a href="{{ pdf.file.url }}" class="btn btn-primary" download>Скачать PDF</a>
+            <button type="button" class="btn btn-primary" id="publish-btn" data-document-id="{{ pdf.id }}" data-is-published="{{ pdf.is_published|yesno:'true,false' }}">
+                {% if pdf.is_published %}Скрыть{% else %}Опубликовать{% endif %}
+            </button>
+        </div>
+    </form>
+
+    <div class="pdf-view-container">
+        <div class="pdf-viewer-section">
+            <h3>Просмотр PDF:</h3>
+            <div class="pdf-viewer-wrapper">
+                <div class="pdf-placeholder" id="pdf-placeholder-detail">
+                    <i>📄</i>
+                    <p>Загрузка PDF...</p>
+                </div>
+                <div id="pdf-viewer-detail"></div>
+            </div>
+        </div>
+
+        <div class="extracted-text-section">
+            <h3>Извлеченный текст:</h3>
+            <textarea readonly style="width: 100%; height: 500px">{{ pdf.extracted_text }}</textarea>
+        </div>
+    </div>
+
+    <div class="pdf-controls-detail" id="pdf-controls-detail">
+        <div class="pdf-nav-buttons">
+            <button id="prev-page-detail" class="btn btn-secondary">Предыдущая</button>
+            <span id="page-num-detail">Страница 1 из 1</span>
+            <button id="next-page-detail" class="btn btn-secondary">Следующая</button>
+        </div>
+    </div>
+
+    <div class="notes-section">
+        <h3>Заметки</h3>
+        <form method="post" class="note-form" id="note-form-detail">
+            {% csrf_token %}
+            <input type="hidden" name="document_id" value="{{ pdf.id }}">
+            <input type="hidden" id="pdf-file-url" value="{{ pdf.file.url }}">
+            <input type="hidden" name="page_number" id="current_page_number" value="1">
+            <div class="form-group">
+                <label for="id_note_text">Текст заметки:</label>
+                <textarea name="text" id="id_note_text" placeholder="Введите текст заметки..." required class="note-textarea"></textarea>
+            </div>
+            <div class="note-form-footer">
+                <button type="submit" class="btn btn-primary">Добавить заметку</button>
+            </div>
+        </form>
+
+        <div class="notes-list">
+            {% for note in notes %}
+            <div class="note-item" data-note-id="{{ note.id }}">
+                <div class="note-content">
+                    <p class="note-text">{{ note.text }}</p>
+                    <span class="note-meta">Стр. {{ note.page_number }} - {{ note.created_at|date:"d.m.Y H:i" }}</span>
+                </div>
+                <button class="note-delete-btn" data-note-id="{{ note.id }}" title="Удалить заметку">✕</button>
+            </div>
+            {% empty %}
+            <p>К этому документу пока нет заметок.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{{ page_texts|json_script:"page-texts-data" }}
+<script>
+// Передаем данные о тексте по страницам в JavaScript
+const pageTextsElement = document.getElementById('page-texts-data');
+window.pageTexts = pageTextsElement ? JSON.parse(pageTextsElement.textContent) : {};
+
+// Инициализация кнопки публикации
+function initPublishButton() {
+    const publishBtn = document.getElementById('publish-btn');
+    if (publishBtn) {
+        publishBtn.addEventListener('click', function() {
+            const documentId = this.dataset.documentId;
+            const isPublished = this.dataset.isPublished === 'true';
+            
+            fetch(`/publish/${documentId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Обновляем кнопку
+                    this.dataset.isPublished = data.is_published;
+                    this.textContent = data.is_published ? 'Скрыть' : 'Опубликовать';
+                    
+                    // Показываем уведомление
+                    showNotification(data.message, 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                showNotification('Ошибка при изменении статуса публикации', 'error');
+            });
+        });
+    }
+}
+
+// Инициализируем кнопку публикации при загрузке страницы
+document.addEventListener('DOMContentLoaded', initPublishButton);
+</script>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>Загрузка PDF</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+        </div>
+        <div class="form-group">
+            {{ form.authors.label_tag }}
+            {{ form.authors }}
+        </div>
+        <div class="form-group">
+            {{ form.keywords.label_tag }}
+            {{ form.keywords }}
+        </div>
+        <div class="form-group">
+            {{ form.doc_type.label_tag }}
+            {{ form.doc_type }}
+        </div>
+        <div class="form-group">
+            {{ form.theme.label_tag }}
+            {{ form.theme }}
+        </div>
+        <div class="form-group">
+            {{ form.file.label_tag }}
+            {{ form.file }}
+        </div>
+        <button type="submit" class="btn">Загрузить</button>
+    </form>
+</div>
+{% endblock %}
