@@ -39,6 +39,7 @@ else:
     SECURE_SSL_REDIRECT = False
     SESSION_COOKIE_SECURE = False
     CSRF_COOKIE_SECURE = False
+    SECURE_PROXY_SSL_HEADER = None
 
 INSTALLED_APPS = [
     'django.contrib.admin',

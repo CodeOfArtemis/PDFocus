@@ -1,1 +1,1 @@
-web: python manage.py migrate && gunicorn wsgi:application --bind 0.0.0.0:$PORT --workers 4 
+web: python manage.py migrate && gunicorn wsgi:application --bind 0.0.0.0:$PORT --workers 4 --forwarded-allow-ips="*" --proxy-protocol 
