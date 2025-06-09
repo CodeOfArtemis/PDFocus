@@ -5,9 +5,10 @@ import os
 import PyPDF2
 from PIL import Image
 from PDFocus import settings
-from keybert import KeyBERT
-from sentence_transformers import SentenceTransformer
 import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.probability import FreqDist
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer
 from sumy.summarizers.text_rank import TextRankSummarizer
@@ -32,10 +33,6 @@ download_nltk_data_if_missing('stopwords', 'corpora')
 
 if hasattr(settings, 'PYTESSERACT_PATH'):
     pytesseract.pytesseract.tesseract_cmd = settings.PYTESSERACT_PATH
-
-# Инициализируем легкую модель для KeyBERT
-model = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-kw_model = KeyBERT(model=model)
 
 def extract_text_from_pdf(pdf_file):
     text = ""
@@ -118,38 +115,39 @@ def extract_text_by_pages(pdf_file):
 
 def extract_keywords_from_text(text):
     """
-    Извлекает ключевые слова из текста с помощью KeyBERT.
+    Извлекает ключевые слова из текста с помощью NLTK.
     Returns a comma-separated string of keywords.
     """
     if not text:
         return ""
 
-    # Предварительная обработка текста
-    cleaned_text = preprocess_text_for_keywords(text)
-    
-    if not cleaned_text:
-        return ""
-
     try:
-        # Ограничиваем длину текста для экономии памяти
-        max_text_length = 10000  # Примерно 2000 слов
-        if len(cleaned_text) > max_text_length:
-            cleaned_text = cleaned_text[:max_text_length]
+        # Предварительная обработка текста
+        cleaned_text = preprocess_text_for_keywords(text)
+        if not cleaned_text:
+            return ""
 
-        # Извлекаем ключевые слова с помощью KeyBERT
-        keywords = kw_model.extract_keywords(
-            cleaned_text,
-            keyphrase_ngram_range=(1, 2),  # Одиночные слова и биграммы
-            stop_words='english',  # Используем английские стоп-слова
-            top_n=10,  # Уменьшаем количество ключевых слов
-            diversity=0.7,  # Разнообразие ключевых слов
-            use_maxsum=True,  # Используем более эффективный алгоритм
-            nr_candidates=20  # Ограничиваем количество кандидатов
-        )
+        # Токенизация
+        tokens = word_tokenize(cleaned_text)
+        
+        # Получаем стоп-слова
+        stop_words = set(stopwords.words('russian'))
+        stop_words.update(stopwords.words('english'))
+        
+        # Фильтруем токены
+        filtered_tokens = [word.lower() for word in tokens 
+                         if word.isalnum() and 
+                         word.lower() not in stop_words and 
+                         len(word) > 2]
+        
+        # Создаем частотное распределение
+        fdist = FreqDist(filtered_tokens)
+        
+        # Получаем топ-10 самых частых слов
+        keywords = [word for word, freq in fdist.most_common(10)]
         
         # Постобработка ключевых слов
-        raw_keywords = [kw for kw, score in keywords]
-        processed_keywords = postprocess_keywords(raw_keywords)
+        processed_keywords = postprocess_keywords(keywords)
         
         # Возвращаем топ-5 после обработки
         result = ", ".join(processed_keywords[:5])
