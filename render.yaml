@@ -32,6 +32,6 @@ services:
 
 databases:
   - name: pdfocus-db
-    databaseName: pdfocus
-    user: postgres
+    databaseName: database_pc01
+    user: database_pc01_user
     plan: free 
