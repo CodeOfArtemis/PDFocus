@@ -92,7 +92,7 @@ WSGI_APPLICATION = 'PDFocus.wsgi.application'
 
 # Настройки базы данных
 if os.environ.get('RENDER'):
-    DATABASE_URL = os.environ.get('DATABASE_URL')
+    DATABASE_URL = os.environ.get('postgresql://database_pc01_user:dFhnNFkVhWnMsNlISeNvOlg3BZPIPzZR@dpg-d1352615pdvs73dbi7tg-a/database_pc01')
     DATABASES = {
         'default': dj_database_url.config(
             default=DATABASE_URL,
