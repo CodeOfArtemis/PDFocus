@@ -10,7 +10,7 @@ services:
       gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.13.0
+        value: 3.11.0
       - key: SECRET_KEY
         generateValue: true
       - key: WEB_CONCURRENCY
