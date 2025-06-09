@@ -85,14 +85,26 @@ TEMPLATES = [
 WSGI_APPLICATION = 'PDFocus.wsgi.application'
 
 # Настройки базы данных
-DATABASE_URL = os.environ.get('DATABASE_URL', 'postgres://postgres:111@localhost:5432/database')
-DATABASES = {
-    'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=not DEBUG
-    )
-}
+if os.environ.get('RENDER'):
+    DATABASE_URL = os.environ.get('DATABASE_URL')
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'database',
+            'USER': 'postgres',
+            'PASSWORD': '111',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {

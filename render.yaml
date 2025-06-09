@@ -27,9 +27,11 @@ services:
         value: "PDFocus.settings"
       - key: PYTHONPATH
         value: "/opt/render/project/src"
+      - key: RENDER
+        value: "true"
 
 databases:
   - name: pdfocus-db
-    databaseName: database
+    databaseName: pdfocus
     user: postgres
     plan: free 
