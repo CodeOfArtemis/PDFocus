@@ -2,12 +2,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
-from .forms import PDFUploadForm, NoteForm
-from .models import PDFDocument, Note
+from .forms import PDFUploadForm, NoteForm, CustomAuthenticationForm, CustomUserCreationForm
+from .models import PDFDocument, Note, PDFPageText
 from django.views.decorators.http import require_POST
-from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text
+from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text, extract_text_by_pages
+from django.db import models
 
 
 def auth_view(request):
@@ -15,8 +15,8 @@ def auth_view(request):
     active_tab = 'login'
     
     # Инициализируем пустые формы
-    login_form = AuthenticationForm(request)
-    register_form = UserCreationForm()
+    login_form = CustomAuthenticationForm(request)
+    register_form = CustomUserCreationForm()
 
     if request.method == 'POST':
         # Данные извлекаются и обрабатываются внутри соответствующих блоков
@@ -30,7 +30,7 @@ def auth_view(request):
             if 'username' in login_post_data:
                 login_post_data['username'] = login_post_data['username'].lower()
 
-            login_form = AuthenticationForm(request, data=login_post_data)
+            login_form = CustomAuthenticationForm(request, data=login_post_data)
             if login_form.is_valid():
                 user = login_form.get_user()
                 login(request, user)
@@ -45,7 +45,7 @@ def auth_view(request):
             if 'username' in register_post_data:
                 register_post_data['username'] = register_post_data['username'].lower()
             
-            register_form = UserCreationForm(data=register_post_data)
+            register_form = CustomUserCreationForm(data=register_post_data)
             if register_form.is_valid():
                 user = register_form.save()
                 login(request, user)
@@ -64,19 +64,35 @@ def auth_view(request):
 @login_required
 def main(request):
     form = PDFUploadForm()
-    recent_notes = Note.objects.filter(user=request.user).order_by('-created_at')[:5]
-    return render(request, 'main.html', {'form': form, 'recent_notes': recent_notes})
+    return render(request, 'main.html', {'form': form})
 
 
 @login_required
 def catalog(request):
-    documents = PDFDocument.objects.filter(user=request.user)
-    return render(request, 'catalog.html', {'documents': documents})
+    # Показываем свои документы + опубликованные документы других пользователей
+    user_documents = PDFDocument.objects.filter(user=request.user)
+    published_documents = PDFDocument.objects.filter(is_published=True).exclude(user=request.user)
+    
+    # Объединяем и сортируем по дате загрузки
+    all_documents = list(user_documents) + list(published_documents)
+    all_documents.sort(key=lambda x: x.upload_date, reverse=True)
+    
+    return render(request, 'catalog.html', {'documents': all_documents})
 
 @login_required
 def detailed(request, id):
     pdf = get_object_or_404(PDFDocument, id=id, user=request.user)
     notes = Note.objects.filter(document=pdf).order_by('page_number')
+    
+    # Получаем текст по страницам (с обработкой ошибки для несуществующей таблицы)
+    page_texts_dict = {}
+    try:
+        page_texts = PDFPageText.objects.filter(document=pdf).order_by('page_number')
+        page_texts_dict = {pt.page_number: pt.text_content for pt in page_texts}
+    except Exception as e:
+        print(f"Error accessing PDFPageText: {e}")
+        # Если таблица не существует, используем общий текст как fallback
+        page_texts_dict = {1: pdf.extracted_text} if pdf.extracted_text else {}
     
     # Обновляем время последнего доступа
     pdf.save() # Простое сохранение обновит `last_accessed` из-за `auto_now=True`
@@ -87,10 +103,22 @@ def detailed(request, id):
         pdf.theme = request.POST.get('theme', '')
         pdf.keywords = request.POST.get('keywords', '')
         pdf.save()
-        messages.success(request, 'Изменения сохранены успешно!')
-        return redirect('detailed', id=pdf.id)
+        
+        # Проверяем, был ли это AJAX-запрос
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'message': 'Изменения сохранены успешно!'
+            })
+        else:
+            messages.success(request, 'Изменения сохранены успешно!')
+            return redirect('detailed', id=pdf.id)
 
-    return render(request, 'detail.html', {'pdf': pdf, 'notes': notes})
+    return render(request, 'detail.html', {
+        'pdf': pdf, 
+        'notes': notes,
+        'page_texts': page_texts_dict
+    })
 
 @login_required
 def account(request):
@@ -128,10 +156,19 @@ def upload_pdf(request):
                 # Извлекаем текст и метаданные
                 pdf.extracted_text = extract_text_from_pdf(pdf.file)
                 pdf.keywords = extract_keywords_from_text(pdf.extracted_text)
-                pdf.theme = extract_theme_from_text(pdf.extracted_text)
+                # pdf.theme остается пустым для ручного заполнения
                 
                 # Сохраняем документ
                 pdf.save()
+                
+                # Извлекаем и сохраняем текст по страницам
+                pages_text = extract_text_by_pages(pdf.file)
+                for page_num, page_text in pages_text.items():
+                    PDFPageText.objects.create(
+                        document=pdf,
+                        page_number=page_num,
+                        text_content=page_text
+                    )
                 
                 response_data = {
                     'success': True,
@@ -164,25 +201,70 @@ def upload_pdf(request):
 
 @login_required
 def delete_pdf(request, id):
+    import time
+    import os
+    
     document = get_object_or_404(PDFDocument, id=id)
+    
+    # Определяем, откуда пришел запрос
+    referer = request.META.get('HTTP_REFERER', '')
+    redirect_url = 'account' if '/account/' in referer else 'catalog'
     
     # Проверяем, что текущий пользователь является владельцем документа
     if document.user != request.user:
         messages.error(request, "У вас нет прав для удаления этого документа.")
-        return redirect('catalog')
+        return redirect(redirect_url)
 
     if request.method == 'POST':
-        # Удаляем связанный файл
-        document.file.delete(save=False) # save=False, т.к. мы удалим объект целиком
+        document_title = document.title
         
-        # Удаляем объект из базы данных
+        # Попытка удаления файла с retry механизмом
+        file_deleted = False
+        if document.file:
+            for attempt in range(3):  # 3 попытки
+                try:
+                    # Сначала закрываем все возможные дескрипторы
+                    if hasattr(document.file.file, 'close'):
+                        document.file.file.close()
+                    
+                    # Пытаемся удалить файл
+                    document.file.delete(save=False)
+                    file_deleted = True
+                    break
+                    
+                except PermissionError as e:
+                    print(f"Попытка {attempt + 1}: Файл заблокирован - {e}")
+                    if attempt < 2:  # Если не последняя попытка
+                        time.sleep(0.5)  # Ждем 500мс
+                        continue
+                    else:
+                        # На последней попытке пробуем альтернативный способ
+                        try:
+                            file_path = document.file.path
+                            if os.path.exists(file_path):
+                                os.remove(file_path)
+                            file_deleted = True
+                        except Exception as alt_error:
+                            print(f"Альтернативное удаление также не удалось: {alt_error}")
+                            # Файл не удалился, но продолжаем удаление записи из БД
+                            break
+                            
+                except Exception as e:
+                    print(f"Неожиданная ошибка при удалении файла: {e}")
+                    break
+        
+        # Удаляем объект из базы данных (даже если файл не удалился)
         document.delete()
         
-        messages.success(request, f'Документ "{document.title}" был успешно удален.')
-        return redirect('catalog')
+        if file_deleted:
+            messages.success(request, f'Документ "{document_title}" был успешно удален.')
+        else:
+            messages.warning(request, f'Документ "{document_title}" удален из системы, но файл может остаться на диске (файл был заблокирован браузером).')
+        
+        return redirect(redirect_url)
     
     # Если это не POST-запрос, просто перенаправляем обратно
-    return redirect('catalog')
+    return redirect(redirect_url)
 
 
 def logout_view(request):
@@ -209,6 +291,7 @@ def save_note(request):
             return JsonResponse({
                 'success': True,
                 'note': {
+                    'id': note.id,
                     'text': note.text,
                     'page_number': note.page_number,
                     'created_at': note.created_at.strftime("%d.%m.%Y %H:%M")
@@ -222,3 +305,78 @@ def save_note(request):
     # (здесь можно сделать более сложную обработку, но для начала так)
     messages.error(request, 'Ошибка при добавлении заметки.')
     return redirect('detailed', id=request.POST.get('document_id'))
+
+
+@login_required
+def delete_note(request, id):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Метод не поддерживается'}, status=405)
+    
+    try:
+        note = get_object_or_404(Note, id=id, user=request.user)
+        
+        # Проверяем, был ли это AJAX-запрос
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            note.delete()
+            return JsonResponse({
+                'success': True,
+                'message': 'Заметка успешно удалена.'
+            })
+        else:
+            # Для обычных запросов
+            document_id = note.document.id
+            note.delete()
+            messages.success(request, 'Заметка успешно удалена.')
+            return redirect('detailed', id=document_id)
+    except Exception as e:
+        print(f"Error deleting note {id}: {e}")
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        else:
+            messages.error(request, f'Ошибка при удалении заметки: {e}')
+            return redirect('detailed', id=request.POST.get('document_id', '/catalog/'))
+
+
+@login_required
+def publish_document(request, id):
+    """Toggle publish status of a document"""
+    document = get_object_or_404(PDFDocument, id=id, user=request.user)
+    
+    if request.method == 'POST':
+        # Переключаем статус публикации
+        document.is_published = not document.is_published
+        document.save()
+        
+        # AJAX-ответ
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': True,
+                'is_published': document.is_published,
+                'message': 'Документ опубликован!' if document.is_published else 'Документ скрыт!'
+            })
+    
+    # Если не AJAX, редирект назад
+    return redirect('detailed', id=document.id)
+
+
+@login_required  
+def public_detail(request, id):
+    """Просмотр опубликованного документа (только чтение)"""
+    pdf = get_object_or_404(PDFDocument, id=id, is_published=True)
+    
+    # Получаем текст по страницам
+    page_texts_dict = {}
+    try:
+        page_texts = PDFPageText.objects.filter(document=pdf).order_by('page_number')
+        page_texts_dict = {pt.page_number: pt.text_content for pt in page_texts}
+    except Exception as e:
+        page_texts_dict = {1: pdf.extracted_text} if pdf.extracted_text else {}
+    
+    return render(request, 'public_detail.html', {
+        'pdf': pdf,
+        'page_texts': page_texts_dict,
+        'is_readonly': True
+    })
+
+
+

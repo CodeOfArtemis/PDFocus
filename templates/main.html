@@ -12,13 +12,12 @@
             Выберите файлы
         </button>
     </div>
-    <div id="pdf-viewer">
-        <div class="pdf-placeholder" id="pdf-placeholder">
-            <i>📄</i>
-            <h3>Загрузите PDF-файл</h3>
-            <p>Перетащите файл в эту область или нажмите кнопку "Выберите файлы"</p>
-        </div>
+    <div class="pdf-placeholder" id="pdf-placeholder">
+        <i>📄</i>
+        <h3>Загрузите PDF-файл</h3>
+        <p>Перетащите файл в эту область или нажмите кнопку "Выберите файлы"</p>
     </div>
+    <div id="pdf-viewer"></div>
     <div class="pdf-controls" id="pdf-controls" style="display: none;">
         <div class="pdf-nav-buttons">
             <button id="prev-page" class="btn btn-secondary">Предыдущая</button>
@@ -29,28 +28,6 @@
             <a href="#" id="open-pdf" class="btn btn-primary" style="display: none;">Открыть в редакторе</a>
             <button id="close-pdf" class="btn btn-secondary">Закрыть</button>
         </div>
-    </div>
-</div>
-
-<div class="notes-container" id="notes-container">
-    <div class="notes-header">
-        <h3>Последние заметки</h3>
-        <button class="add-note-btn" onclick="location.href='{% url 'catalog' %}'">
-            Все заметки
-        </button>
-    </div>
-    <div class="notes-list">
-        {% for note in recent_notes %}
-        <div class="note-item">
-            <div class="note-text">{{ note.text }}</div>
-            <div class="note-meta">
-                <span>{{ note.document.title }}</span>
-                <span>Страница {{ note.page_number }}</span>
-            </div>
-        </div>
-        {% empty %}
-        <p>Нет сохраненных заметок</p>
-        {% endfor %}
     </div>
 </div>
 {% endblock %}

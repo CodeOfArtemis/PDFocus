@@ -7,4 +7,6 @@ yake>=0.4.8
 nltk>=3.9.1
 pytesseract>=0.3.10
 whitenoise>=6.6.0
-dj-database-url>=2.1.0 
+dj-database-url>=2.1.0
+sumy>=0.11.0
+pymorphy2>=0.9.1

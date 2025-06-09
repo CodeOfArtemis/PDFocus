@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <div class="detail-header">
+        <h2>{{ pdf.title }}</h2>
+        <div class="public-badge">
+            <span class="badge badge-public">Публичный документ</span>
+        </div>
+    </div>
+
+    <div class="pdf-meta-info">
+        <div class="meta-row">
+            <strong>Автор:</strong> {{ pdf.authors }}
+        </div>
+        <div class="meta-row">
+            <strong>Тип:</strong> {{ pdf.get_doc_type_display }}
+        </div>
+        {% if pdf.theme %}
+        <div class="meta-row">
+            <strong>Тема:</strong> {{ pdf.theme }}
+        </div>
+        {% endif %}
+        {% if pdf.keywords %}
+        <div class="meta-row">
+            <strong>Ключевые слова:</strong> {{ pdf.keywords }}
+        </div>
+        {% endif %}
+        <div class="meta-row">
+            <strong>Дата публикации:</strong> {{ pdf.upload_date|date:"d.m.Y H:i" }}
+        </div>
+    </div>
+
+    <div class="document-actions-public">
+        <a href="{% url 'catalog' %}" class="btn btn-secondary">← Назад к каталогу</a>
+        <a href="{{ pdf.file.url }}" class="btn btn-primary" download>Скачать PDF</a>
+    </div>
+
+    <div class="pdf-view-container">
+        <div class="pdf-viewer-section">
+            <h3>Просмотр PDF:</h3>
+            <div class="pdf-viewer-wrapper">
+                <div id="pdf-viewer-detail">
+                    <div class="pdf-placeholder" id="pdf-placeholder-detail">
+                        <i>📄</i>
+                        <p>Загрузка PDF...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="extracted-text-section">
+            <h3>Извлеченный текст:</h3>
+            <textarea readonly style="width: 100%; height: 500px">{{ pdf.extracted_text }}</textarea>
+        </div>
+    </div>
+
+    <div class="pdf-controls-detail" id="pdf-controls-detail">
+        <div class="pdf-nav-buttons">
+            <button id="prev-page-detail" class="btn btn-secondary">Предыдущая</button>
+            <span id="page-num-detail">Страница 1 из 1</span>
+            <button id="next-page-detail" class="btn btn-secondary">Следующая</button>
+        </div>
+    </div>
+
+    <div class="readonly-notice">
+        <p><i>ℹ️</i> Это публичный документ. Вы можете только просматривать и скачивать его.</p>
+    </div>
+</div>
+
+{{ page_texts|json_script:"page-texts-data" }}
+<input type="hidden" id="pdf-file-url" value="{{ pdf.file.url }}">
+<input type="hidden" name="document_id" value="{{ pdf.id }}">
+
+<script>
+// Передаем данные о тексте по страницам в JavaScript
+const pageTextsElement = document.getElementById('page-texts-data');
+window.pageTexts = pageTextsElement ? JSON.parse(pageTextsElement.textContent) : {};
+
+// Инициализация PDF viewer для публичного просмотра
+document.addEventListener('DOMContentLoaded', function() {
+    // Ждем когда app.js загрузится и сделает функцию доступной
+    function waitForInit() {
+        if (typeof window.initDetailPagePdf === 'function') {
+            window.initDetailPagePdf();
+        } else {
+            // Повторяем попытку через 100мс
+            setTimeout(waitForInit, 100);
+        }
+    }
+    waitForInit();
+});
+</script>
+{% endblock %} 

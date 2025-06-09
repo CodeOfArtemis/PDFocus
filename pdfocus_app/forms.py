@@ -1,5 +1,23 @@
 from django import forms
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import PDFDocument, Note
+
+
+class CustomAuthenticationForm(AuthenticationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Имя пользователя'})
+        self.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Пароль'})
+        self.error_messages['invalid_login'] = 'Неверное имя пользователя или пароль.'
+
+class CustomUserCreationForm(UserCreationForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field_name, field in self.fields.items():
+            field.widget.attrs.update({'class': 'form-control'})
+    
+    class Meta(UserCreationForm.Meta):
+        fields = ('username',)
 
 
 class PDFUploadForm(forms.ModelForm):

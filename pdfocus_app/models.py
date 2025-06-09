@@ -26,9 +26,24 @@ class PDFDocument(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
     last_accessed = models.DateTimeField(auto_now=True)
     thumbnail = models.ImageField(upload_to='thumbnails/', null=True, blank=True)
+    is_published = models.BooleanField(default=False)
 
     def __str__(self):
         return self.title
+
+
+class PDFPageText(models.Model):
+    document = models.ForeignKey(PDFDocument, on_delete=models.CASCADE, related_name='page_texts')
+    page_number = models.PositiveIntegerField()
+    text_content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ['document', 'page_number']
+        ordering = ['page_number']
+
+    def __str__(self):
+        return f"{self.document.title} - Страница {self.page_number}"
 
 
 class Note(models.Model):

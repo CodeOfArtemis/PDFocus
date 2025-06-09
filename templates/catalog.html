@@ -5,7 +5,7 @@
 <h2>Каталог PDF-файлов</h2>
 <div class="catalog-container">
     {% for document in documents %}
-    <div class="pdf-card">
+    <div class="pdf-card" data-search-title="{{ document.title|lower }}" data-search-authors="{{ document.authors|lower }}" data-search-theme="{{ document.theme|default:''|lower }}" data-search-keywords="{{ document.keywords|default:''|lower }}">
         <div class="pdf-preview">
             {% if document.thumbnail %}
             <img src="{{ document.thumbnail.url }}" alt="{{ document.title }}">
@@ -15,18 +15,31 @@
         </div>
         <div class="pdf-info">
             <h3>{{ document.title }}</h3>
+            {% if document.user != request.user %}
+                <div class="public-badge-small">
+                    <span class="badge badge-public-small">Публичный</span>
+                </div>
+            {% endif %}
             <div class="pdf-meta">
                 <span>{{ document.authors }}</span>
                 <span>{{ document.upload_date|date:"d.m.Y" }}</span>
             </div>
+            {% if document.theme %}
+                <div class="document-theme" style="font-size: 0.9rem; color: #6c757d; margin-bottom: 0.5rem; font-style: italic;">{{ document.theme|truncatechars:80 }}</div>
+            {% endif %}
+            {% if document.keywords %}
+                <div class="document-keywords" style="font-size: 0.85rem; color: #6c757d; margin-bottom: 0.5rem;"><strong>Ключевые слова:</strong> {{ document.keywords|truncatechars:60 }}</div>
+            {% endif %}
             <div class="pdf-actions">
-                <a href="{% url 'detailed' document.id %}" class="btn btn-primary">
-                    Открыть
-                </a>
-                <form action="{% url 'delete_pdf' document.id %}" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот файл?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Удалить</button>
-                </form>
+                {% if document.user == request.user %}
+                    <a href="{% url 'detailed' document.id %}" class="btn btn-primary" style="width: 100%;">
+                        Открыть
+                    </a>
+                {% else %}
+                    <a href="{% url 'public_detail' document.id %}" class="btn btn-primary" style="width: 100%;">
+                        Просмотреть
+                    </a>
+                {% endif %}
             </div>
         </div>
     </div>
