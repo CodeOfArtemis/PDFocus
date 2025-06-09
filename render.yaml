@@ -2,50 +2,36 @@ services:
   - type: web
     name: pdfocus
     env: python
-    buildCommand: |
-      pip install --upgrade pip
-      pip install -r requirements.txt
+    buildCommand: pip install -r requirements.txt
     startCommand: |
-      python manage.py migrate auth zero --noinput
-      python manage.py migrate admin zero --noinput
-      python manage.py migrate sessions zero --noinput
-      python manage.py migrate contenttypes zero --noinput
-      python manage.py migrate pdfocus_app zero --noinput
-      python manage.py migrate --noinput
-      python manage.py migrate auth --noinput
-      python manage.py migrate admin --noinput
-      python manage.py migrate sessions --noinput
-      python manage.py migrate contenttypes --noinput
-      python manage.py migrate pdfocus_app --noinput
-      python manage.py migrate --noinput
-      python manage.py createsuperuser --noinput --username admin --email admin@example.com || true
-      gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT --workers 4 --forwarded-allow-ips="*" --proxy-protocol
+      python manage.py migrate auth
+      python manage.py migrate admin
+      python manage.py migrate sessions
+      python manage.py migrate contenttypes
+      python manage.py migrate pdfocus_app
+      python manage.py migrate
+      cd /opt/render/project/src && PYTHONPATH=/opt/render/project/src gunicorn PDFocus.wsgi:application --bind 0.0.0.0:$PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0
-      - key: SECRET_KEY
-        generateValue: true
-      - key: WEB_CONCURRENCY
-        value: 4
       - key: DATABASE_URL
         fromDatabase:
           name: pdfocus-db
           property: connectionString
-      - key: PORT
-        value: 10000
-      - key: DEBUG
-        value: "False"
-      - key: DJANGO_SETTINGS_MODULE
-        value: "PDFocus.settings"
-      - key: PYTHONPATH
-        value: "/opt/render/project/src"
-      - key: RENDER
-        value: "true"
-      - key: DJANGO_SUPERUSER_PASSWORD
+      - key: SECRET_KEY
         generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DJANGO_SETTINGS_MODULE
+        value: PDFocus.settings
+      - key: DJANGO_SUPERUSER_PASSWORD
+        value: "your-secure-password-here"
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: "admin"
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: "admin@example.com"
 
 databases:
   - name: pdfocus-db
-    databaseName: database_pc01
-    user: database_pc01_user
-    plan: free 
+    databaseName: pdfocus
+    user: pdfocus 
