@@ -33,5 +33,5 @@ services:
 
 databases:
   - name: pdfocus-db
-    databaseName: pdfocus
-    user: pdfocus 
+    databaseName: database_pc01
+    user: database_pc01_user 
