@@ -26,14 +26,31 @@ body {
     line-height: 1.6;
 }
 
-.account-actions {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex-shrink: 0;
+/* Общие стили для кнопок */
+.btn {
+    display: inline-block;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-align: center;
 }
 
-/* Боковое меню с иконками */
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.btn-primary { background-color: var(--sky-blue); color: white; }
+.btn-primary:hover { background-color: var(--button-hover); }
+.btn-success { background-color: #10b981; color: white; }
+.btn-success:hover { background-color: #059669; }
+.btn-secondary { background-color: #6b7280; color: white; }
+.btn-secondary:hover { background-color: #4b5563; }
+.btn-danger { background-color: #ef4444; color: white; }
+.btn-danger:hover { background-color: #dc2626; }
+
+/* Боковое меню */
 .sidebar {
     width: 280px;
     background: linear-gradient(135deg, var(--menu-blue), var(--dark-blue));
@@ -73,6 +90,7 @@ body {
     border-radius: 0 30px 30px 0;
     margin: 0 0.5rem;
     transition: var(--transition);
+    font-size: 1.1rem;
 }
 
 .sidebar-menu li a:hover {
@@ -89,51 +107,12 @@ body {
 
 .sidebar-menu li a i {
     margin-right: 12px;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     width: 20px;
     text-align: center;
 }
 
-/* Личный кабинет */
-.account-btn {
-    background: var(--sky-blue);
-    color: white;
-    border: none;
-    font-size: 1.2rem;
-    padding: 0.6rem 1.2rem;
-    border-radius: 30px;
-    cursor: pointer;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-    box-shadow: var(--shadow);
-}
-
-.account-btn:hover {
-    background: var(--button-hover);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-}
-
-.account-btn i {
-    margin-right: 8px;
-    font-size: 1.1em;
-}
-
-.logout-form {
-    /* Эти стили больше не нужны, так как форма теперь встраивается в header */
-}
-
-.logout-btn {
-    background: #e74c3c !important; /* Красный цвет для акцента */
-}
-
-.logout-btn:hover {
-    background: #c0392b !important; /* Более темный красный при наведении */
-}
-
-/* Остальные стили */
+/* Хедер */
 header {
     background-color: var(--sky-blue);
     color: white;
@@ -160,7 +139,39 @@ header {
     flex-shrink: 0;
 }
 
-/* Поисковая строка */
+.account-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.account-btn {
+    background: var(--sky-blue);
+    color: white;
+    border: none;
+    font-size: 1.2rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow);
+}
+
+.account-btn:hover {
+    background: var(--button-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+.account-btn i { margin-right: 8px; font-size: 1.1em; }
+.logout-btn { background: #e74c3c !important; }
+.logout-btn:hover { background: #c0392b !important; }
+
+/* Поиск */
 .search-container {
     position: absolute;
     left: 50%;
@@ -192,105 +203,152 @@ header {
     border: none;
     color: var(--dark-blue);
     font-size: 1.2rem;
-    pointer-events: none; /* Убираем возможность клика */
-    user-select: none; /* Убираем возможность выделения */
+    pointer-events: none;
+    user-select: none;
 }
 
-/* Стили для сообщения "Ничего не найдено" при поиске */
 .no-search-results {
     grid-column: 1 / -1;
     text-align: center;
     padding: 2rem;
 }
 
-
-
 /* Основное содержимое */
 .main-container {
     margin-left: 280px;
-    padding: 2rem;
+    padding: 32px;
 }
 
-/* Каталог PDF */
-.catalog-container {
+/* Каталог и карточки PDF */
+.catalog-container, .documents-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 1.5rem;
     margin-top: 1.5rem;
 }
 
-.pdf-card {
+.pdf-card, .document-card {
     background-color: #fff;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     overflow: hidden;
     display: flex;
     flex-direction: column;
     transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s ease;
+    border: none !important;
 }
 
-.pdf-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+.main-container .pdf-card, .main-container .document-card {
+    border: none !important;
+    box-shadow: none !important;
 }
 
-.pdf-preview {
+.pdf-card:hover, .document-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.pdf-preview, .document-thumbnail {
     width: 100%;
-    height: 200px;
-    background-color: #f0f2f5;
+    height: 180px;
+    background-color: #f8f9fa;
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
-.pdf-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+.pdf-preview img { width: 100%; height: 100%; object-fit: cover; }
+.pdf-icon, .document-icon { 
+    font-size: 4rem; 
+    color: #d1d5db;
+    opacity: 0.7;
 }
 
-.pdf-icon {
-    font-size: 4rem;
-    color: #8c8c8c;
-}
-
-.pdf-info {
-    padding: 15px;
+.pdf-info, .document-info {
+    padding: 1.2rem;
     flex-grow: 1;
     display: flex;
     flex-direction: column;
 }
 
-.pdf-info h3 {
-    margin-top: 0;
-    margin-bottom: 10px;
+.pdf-info h3, .document-info h3 {
+    margin-bottom: 0.8rem;
     font-size: 1.1rem;
-    color: #333;
-    flex-grow: 1; /* Позволяет заголовку занимать доступное пространство */
+    color: var(--text-dark);
+    font-weight: 600;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.pdf-meta {
+.pdf-meta, .document-authors, .document-theme {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
     display: flex;
     justify-content: space-between;
-    font-size: 0.9rem;
-    color: #666;
-    margin-bottom: 15px;
+    align-items: center;
 }
 
-.pdf-actions {
-    margin-top: auto; /* Прижимает блок к низу */
+.document-keywords {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
 }
 
-.pdf-actions .btn {
+.document-theme {
+    font-style: italic;
+    color: #6b7280;
+}
+
+.document-keywords {
+    font-size: 0.8rem;
+    background: #f8f9fa;
+    color: #6c757d;
+    padding: 0.3rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: block;
     width: 100%;
+}
+
+.document-keywords strong {
+    color: #6c757d;
+}
+
+.pdf-actions, .document-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: auto;
+    padding-top: 0.5rem;
+}
+
+.pdf-actions .btn, .document-actions .btn {
+    flex: 1;
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    font-weight: 500;
     text-align: center;
+    transition: all 0.2s ease;
 }
 
 /* Личный кабинет */
 .account-container {
+    padding: 1rem 2rem 2rem 1rem;
     display: grid;
     grid-template-columns: 250px 1fr;
     gap: 2rem;
+}
+
+.account-content {
+    width: 100%;
+    max-width: 1200px;
 }
 
 .account-columns {
@@ -300,17 +358,36 @@ header {
     align-items: start;
 }
 
-.account-files, .account-notes {
+.account-files {
     background: white;
-    border-radius: var(--border-radius);
     padding: 1.5rem;
+    border-radius: var(--border-radius);
     box-shadow: var(--shadow);
+    order: 1;
+    border-bottom: 2px solid var(--sky-blue);
+}
+
+.account-notes {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    order: 2;
+}
+
+.account-files h3, .account-notes h3 {
+    color: var(--dark-blue);
+    margin-bottom: 1rem;
+    font-size: 1.75rem;
+    font-weight: 500;
+    border-bottom: 2px solid var(--light-blue);
+    padding-bottom: 0.5rem;
 }
 
 .account-files .pdf-card {
     display: flex;
     flex-direction: column;
-    height: 120px; /* Фиксированная высота для карточек */
+    height: 120px;
 }
 
 .account-files .pdf-info {
@@ -323,22 +400,14 @@ header {
 .account-files .pdf-info h4 {
     margin: 0 0 0.5rem 0;
     font-size: 1rem;
-    flex-grow: 1; /* Заголовок займет все доступное пространство */
+    flex-grow: 1;
     display: flex;
     align-items: flex-start;
 }
 
 .account-files .pdf-meta {
-    margin-top: auto; /* Прижимаем к низу */
+    margin-top: auto;
     margin-bottom: 0.5rem;
-}
-
-.account-files h3, .account-notes h3 {
-    margin-top: 0;
-    margin-bottom: 1.5rem;
-    color: var(--dark-blue);
-    border-bottom: 2px solid var(--sky-blue);
-    padding-bottom: 0.5rem;
 }
 
 .account-files .pdf-actions {
@@ -363,452 +432,6 @@ header {
     width: 100%;
 }
 
-.user-profile {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 1.5rem;
-    box-shadow: var(--shadow);
-    text-align: center;
-}
-
-.user-avatar {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background: var(--sky-blue);
-    margin: 0 auto 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 2rem;
-}
-
-.user-stats {
-    margin-top: 1.5rem;
-}
-
-.stat-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-}
-
-/* Читалка PDF */
-.pdf-viewer-container {
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: 1rem;
-    margin-bottom: 2rem;
-}
-
-.pdf-controls {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-}
-
-.pdf-controls .btn {
-    min-width: 150px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    box-sizing: border-box;
-}
-
-.pdf-nav-buttons, .pdf-action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.pdf-nav-buttons span {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 150px;
-    height: 40px;
-    padding: 0;
-    font-weight: 500;
-    box-sizing: border-box;
-}
-
-.pdf-nav-buttons button {
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 4px;
-    background: var(--sky-blue);
-    color: white;
-    cursor: pointer;
-}
-
-#pdf-viewer {
-    background: #e9e9e9;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    min-height: 60vh;
-    max-height: 90vh;
-    height: auto;
-    overflow-y: auto;
-    position: relative;
-    display: flex;
-    justify-content: center;
-}
-
-#pdf-viewer canvas {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
-}
-
-/* Заметки */
-.notes-container {
-    background: var(--light-gray);
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: 1rem;
-}
-
-/* Загрузка файлов */
-.upload-area {
-    border: 2px dashed var(--sky-blue);
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    text-align: center;
-    margin-bottom: 1rem;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-.upload-area:hover {
-    background: var(--light-blue);
-}
-
-/* Область после закрытия PDF */
-.pdf-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    background-color: var(--light-gray);
-    border-radius: var(--border-radius);
-    color: #666;
-    text-align: center;
-    padding: 2rem;
-}
-
-.pdf-placeholder i {
-    font-size: 3rem;
-    margin-bottom: 1rem;
-    color: var(--sky-blue);
-}
-
-/* Формы авторизации/регистрации */
-.auth-form {
-    background: white;
-    border-radius: var(--border-radius);
-    padding: 2rem;
-    box-shadow: var(--shadow);
-    max-width: 400px;
-    margin: 2rem auto;
-}
-
-.auth-form h2 {
-    margin-bottom: 1.5rem;
-    text-align: center;
-    color: var(--dark-blue);
-}
-
-.auth-form input {
-    width: 100%;
-    padding: 0.8rem;
-    margin-bottom: 1rem;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-}
-
-.auth-form button {
-    width: 100%;
-}
-
-.auth-switch {
-    text-align: center;
-    margin-top: 1rem;
-    color: #666;
-}
-
-.auth-switch a {
-    color: var(--dark-blue);
-    font-weight: 500;
-    text-decoration: none;
-}
-
-/* =================================
-   ОБЩИЕ СТИЛИ КОМПОНЕНТОВ
-   ================================= */
-
-/* --- Общий стиль кнопок --- */
-.btn {
-    display: inline-block;
-    padding: 0.6rem 1.2rem;
-    border: none;
-    border-radius: var(--border-radius);
-    cursor: pointer;
-    font-weight: 500;
-    text-align: center;
-    text-decoration: none;
-    transition: var(--transition);
-    color: white; /* Белый текст по умолчанию для всех кнопок */
-}
-
-.btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-/* Цветовые модификаторы */
-.btn-primary {
-    background-color: var(--sky-blue);
-}
-.btn-primary:hover {
-    background-color: var(--dark-blue);
-}
-
-.btn-success {
-    background-color: #28a745; /* Зеленый */
-}
-.btn-success:hover {
-    background-color: #218838;
-}
-
-.btn-secondary {
-    background-color: #6c757d; /* Серый */
-}
-.btn-secondary:hover {
-    background-color: #5a6268;
-}
-
-.btn-danger {
-    background-color: #dc3545; /* Красный */
-}
-.btn-danger:hover {
-    background-color: #c82333;
-}
-
-/* Стили для ошибок форм */
-.form-errors, .field-errors {
-    background-color: #f8d7da;
-    color: #721c24;
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 1rem;
-    border: 1px solid #f5c6cb;
-    border-radius: var(--border-radius);
-}
-
-.field-errors {
-    margin-top: -0.5rem;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
-}
-
-.auth-form ul.errorlist {
-    list-style-type: none;
-    padding: 0;
-    color: #721c24;
-    margin: -0.5rem 0 0.5rem;
-}
-
-.field-errors ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-    .sidebar {
-        width: 100%;
-        height: auto;
-        position: relative;
-    }
-
-    header, .main-container {
-        margin-left: 0;
-    }
-
-    .account-container {
-        grid-template-columns: 1fr;
-    }
-
-    .search-container {
-        position: static;
-        transform: none;
-        width: 100%;
-        margin: 1rem 0;
-        max-width: none;
-    }
-    
-    .header-container {
-        flex-direction: column;
-        gap: 1rem;
-        align-items: center;
-    }
-    
-    .account-actions {
-        width: 100%;
-        justify-content: center;
-    }
-}
-
-.auth-container {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 400px;
-    margin-bottom: 1.5rem;
-}
-
-.alert.alert-danger {
-    border: 1px solid #dc3545;
-    border-radius: 4px;
-    padding: 0.75rem 1.25rem;
-    margin-bottom: 1rem;
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.alert.alert-danger ul {
-    margin: 0;
-    padding-left: 20px;
-}
-
-.tabs-container {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-}
-
-/* Стили для формы редактирования метаданных */
-.pdf-meta-form .form-group {
-    margin-bottom: 1rem;
-}
-
-.pdf-meta-form .editable-field,
-.note-textarea,
-.page-number-input {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.note-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.page-number-input {
-    width: 120px; /* Делаем поле для номера страницы компактным */
-}
-
-.pdf-meta-form .form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 1rem;
-    margin-bottom: 1.5rem;
-}
-
-.note-form-footer {
-    display: flex;
-    justify-content: flex-end;
-}
-
-/* Стили для секции заметок на странице detail.html */
-.notes-section {
-    margin-top: 2rem;
-    margin-bottom: 1.5rem;
-}
-
-.note-form .form-group {
-    margin-bottom: 1rem;
-}
-
-.note-form-footer {
-    display: flex;
-    justify-content: flex-end; /* Выравниваем по правому краю */
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 1.5rem; /* Отступ снизу от списка заметок */
-}
-
-.notes-list .note-item {
-    background-color: #f8f9fa;
-    padding: 1rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1rem;
-    border-left: 4px solid var(--sky-blue);
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    position: relative;
-}
-
-.note-content {
-    flex: 1;
-}
-
-.note-delete-btn {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    font-size: 12px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-    margin-left: 1rem;
-}
-
-.note-delete-btn:hover {
-    background: #c0392b;
-    transform: scale(1.1);
-}
-
-.note-item .note-text {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.note-item .note-meta {
-    font-size: 0.8rem;
-    color: #6c757d;
-}
-
-/* Стили для кнопки "Назад к каталогу" */
-.back-to-catalog-btn {
-    display: block;
-    width: fit-content; /* Ширина по содержимому */
-    margin-left: auto;   /* Прижимаем вправо */
-    margin-right: 0;      /* Убираем правый отступ */
-    margin-bottom: 1rem;  /* Отступ снизу */
-}
-
-/* Стили для личного кабинета */
 .account-container .pdf-card {
     height: auto;
     min-height: 80px;
@@ -847,36 +470,43 @@ header {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-.pdf-action-buttons {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: flex-end;
+.user-profile {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    text-align: center;
 }
 
-.pdf-action-buttons .btn,
-.pdf-action-buttons a.btn {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    height: 40px !important;
-    min-width: 150px !important;
-    box-sizing: border-box !important;
-}
-
-.form-actions {
-    display: flex;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-}
-
-.form-actions .btn {
-    padding: 0.5rem 1rem;
-    min-height: 38px;
+.user-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--sky-blue);
+    margin: 0 auto 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.user-stats {
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* PDF Viewer */
+.pdf-viewer-container {
+    margin-left: 280px;
+    padding: 2rem;
 }
 
 /* Стили для страницы детального просмотра PDF */
@@ -891,7 +521,8 @@ header {
     background: white;
     border-radius: var(--border-radius);
     padding: 1.5rem;
-    box-shadow: var(--shadow);
+    box-shadow: none;
+    border: none;
 }
 
 .pdf-viewer-section h3, .extracted-text-section h3 {
@@ -908,21 +539,16 @@ header {
     height: 500px;
 }
 
-#pdf-viewer-detail {
-    background: #e9e9e9;
+.pdf-controls, .pdf-controls-detail {
+    background: white;
+    padding: 1rem;
     border-radius: var(--border-radius);
-    height: 450px;
-    overflow-y: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    box-shadow: none;
+    border: none;
     margin-bottom: 1rem;
-}
-
-#pdf-viewer-detail canvas {
-    max-width: 100%;
-    height: auto;
-    object-fit: contain;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .pdf-controls-detail {
@@ -932,6 +558,8 @@ header {
     margin-bottom: 2rem;
     display: flex;
     justify-content: center;
+    box-shadow: none;
+    border: none;
 }
 
 .pdf-controls-detail .pdf-nav-buttons {
@@ -965,184 +593,448 @@ header {
     text-align: center;
 }
 
-/* Публичная система */
-.public-badge {
-    margin-top: 10px;
+.pdf-nav-buttons, .pdf-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
 }
 
+.pdf-nav-buttons span {
+    background: var(--light-blue);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 500;
+    color: var(--dark-blue);
+    min-width: 120px;
+    text-align: center;
+}
+
+.pdf-nav-buttons button {
+    background: var(--sky-blue);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#pdf-viewer {
+    background: #e9e9e9;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    min-height: 60vh;
+    max-height: 90vh;
+    height: auto;
+    overflow-y: auto;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    box-shadow: none;
+    border: none;
+}
+
+#pdf-viewer-detail {
+    background: #e9e9e9;
+    border-radius: var(--border-radius);
+    height: 450px;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+    box-shadow: none;
+    border: none;
+}
+
+#pdf-viewer canvas, #pdf-viewer-detail canvas {
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    border: none;
+}
+
+/* Стили для кнопки "Назад к каталогу" */
+.back-to-catalog-btn {
+    display: block;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: 0;
+    margin-bottom: 1rem;
+}
+
+/* Стили для действий с PDF */
+.pdf-action-buttons {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end;
+}
+
+.pdf-action-buttons .btn,
+.pdf-action-buttons a.btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 40px !important;
+    min-width: 150px !important;
+    box-sizing: border-box !important;
+}
+
+/* Стили для формы редактирования метаданных */
+.pdf-meta-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.pdf-meta-form .editable-field,
+.note-textarea,
+.page-number-input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.note-textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.page-number-input {
+    width: 120px;
+}
+
+.pdf-meta-form .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.note-form-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Стили для секции заметок на странице detail.html */
+.notes-section {
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.note-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.note-form-footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.notes-list .note-item {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    border-left: 4px solid var(--sky-blue);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.note-delete-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    margin-left: 1rem;
+}
+
+.note-delete-btn:hover {
+    background: #c0392b;
+    transform: scale(1.1);
+}
+
+/* Заметки */
+.notes-container, .notes-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: none;
+    border: none;
+}
+
+.note-content { margin-bottom: 0.5rem; }
+
+.note-item .note-text { font-weight: 500; color: var(--text-dark); }
+.note-item .note-meta { font-size: 0.8rem; color: #666; }
+
+/* Формы */
+.upload-area {
+    border: 2px dashed var(--sky-blue);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    background: var(--light-blue);
+    transition: var(--transition);
+    cursor: pointer;
+    margin-bottom: 2rem;
+}
+
+.upload-area:hover {
+    background: #d6ebff;
+    border-color: var(--dark-blue);
+}
+
+.pdf-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    color: #999;
+    margin-bottom: 2rem;
+}
+
+.pdf-placeholder i { font-size: 4rem; margin-bottom: 1rem; }
+
+.auth-form {
+    background: white;
+    padding: 2rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.auth-form h2 { text-align: center; margin-bottom: 1.5rem; color: var(--text-dark); }
+
+.auth-form input {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.auth-form button { width: 100%; }
+
+.auth-switch { text-align: center; margin-top: 1rem; }
+.auth-switch a { color: var(--sky-blue); text-decoration: none; }
+
+/* Ошибки */
+.form-errors, .field-errors {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.field-errors { margin-top: 0.25rem; margin-bottom: 0; }
+.auth-form ul.errorlist { list-style: none; padding: 0; margin: 0; }
+.field-errors ul { margin: 0; padding-left: 1rem; }
+
+/* Бейджи и метки */
 .badge {
-    padding: 0.4rem 0.8rem;
-    border-radius: 15px;
-    font-size: 0.85rem;
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+}
+
+.badge-public, .public-badge {
+    background-color: #28a745;
+    color: white;
     font-weight: 500;
 }
 
-.badge-public {
-    background-color: #28a745;
-    color: white;
-}
-
-.badge-public-small {
+.badge-public-small, .public-badge-small {
     background-color: #28a745;
     color: white;
     padding: 0.2rem 0.5rem;
     border-radius: 10px;
     font-size: 0.75rem;
     font-weight: 500;
-}
-
-.public-badge-small {
+    display: inline-block;
+    line-height: 1;
     margin-bottom: 0.5rem;
+    width: 82px;
+    height: 18px;
+    text-align: center;
+    box-sizing: border-box;
 }
 
-.pdf-meta-info {
-    background: var(--light-gray);
-    padding: 1.5rem;
-    border-radius: var(--border-radius);
-    margin-bottom: 1.5rem;
+.public-badge-small .badge {
+    background-color: #28a745;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    display: inline-block;
+    line-height: 1;
+    width: 82px;
+    height: 18px;
+    text-align: center;
+    box-sizing: border-box;
 }
 
-.meta-row {
-    margin-bottom: 0.8rem;
-    font-size: 1rem;
-}
+/* Дополнительные элементы */
+.pdf-meta-info { background: var(--light-blue); padding: 1rem; border-radius: var(--border-radius); }
+.meta-row { display: flex; justify-content: space-between; padding: 0.25rem 0; }
+.meta-row:last-child { border-bottom: none; }
 
-.meta-row:last-child {
-    margin-bottom: 0;
-}
-
-.document-actions-public {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
-    align-items: center;
-}
-
-.readonly-notice {
-    background: #e7f3ff;
-    border: 1px solid #b8daff;
-    border-radius: var(--border-radius);
-    padding: 1rem;
-    margin-top: 1.5rem;
-    color: #004085;
-}
-
-.readonly-notice i {
-    margin-right: 0.5rem;
-}
-
-/* Публичный каталог */
-.documents-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
-}
-
-.document-card {
-    background: white;
-    border-radius: var(--border-radius);
-    box-shadow: var(--shadow);
-    padding: 1.5rem;
-    transition: var(--transition);
-    border: 1px solid #e9ecef;
-}
-
-.document-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-}
-
-.document-thumbnail {
-    height: 120px;
-    background: var(--light-gray);
-    border-radius: var(--border-radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-}
-
-.document-icon {
-    font-size: 3rem;
-    color: var(--dark-blue);
-}
-
-.document-info h3 {
-    color: var(--text-dark);
-    margin-bottom: 0.8rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-    line-height: 1.3;
-}
-
-.document-authors,
-.document-type,
-.document-theme,
-.document-date {
-    color: #6c757d;
-    margin-bottom: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.document-keywords {
-    background: #f8f9fa;
-    padding: 0.5rem;
-    border-radius: 4px;
-    margin-bottom: 0.8rem;
-    font-size: 0.85rem;
-}
-
-.document-actions {
+.document-actions-public, .form-actions {
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
 }
 
-.document-actions .btn {
-    flex: 1;
-    text-align: center;
-    font-size: 0.9rem;
+.readonly-notice {
+    background: #fff3cd;
+    color: #856404;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1rem;
+    border: 1px solid #ffeaa7;
 }
+
+.readonly-notice i { margin-right: 0.5rem; }
 
 .empty-state {
     text-align: center;
-    padding: 4rem 2rem;
-    color: #6c757d;
+    padding: 3rem;
+    color: #666;
 }
 
-.empty-state i {
-    font-size: 4rem;
-    margin-bottom: 1rem;
-    display: block;
+.empty-state i { font-size: 3rem; margin-bottom: 1rem; color: #ccc; }
+.empty-state h3 { margin-bottom: 0.5rem; }
+
+.card {
+    background: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
 }
 
-.empty-state h3 {
-    margin-bottom: 1rem;
+/* Стили для смены пароля */
+.password-change-container, .password-change-done-container {
+    background-color: white;
+    color: var(--text-dark);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    box-shadow: var(--shadow);
+    max-width: 500px;
+    margin: 2rem auto;
+}
+
+.password-change-container .card, .password-change-done-container .card {
+    background-color: white;
+    border: none;
+    box-shadow: none;
+}
+
+.password-change-container .card-header, .password-change-done-container .card-header {
+    background-color: var(--light-blue);
+    border-bottom: 1px solid #ddd;
+    color: var(--dark-blue);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+.password-change-container .card-header h3, .password-change-done-container .card-header h3 {
+    color: var(--dark-blue);
+    margin: 0;
+    font-weight: 600;
+}
+
+.password-change-container .card-body, .password-change-done-container .card-body {
+    background-color: white;
     color: var(--text-dark);
 }
 
-/* Стили для карточки документа */
-.card {
-    border: none !important;
-    box-shadow: none !important;
-    background: transparent;
-    padding: 0;
+.password-change-done-container .card-body { text-align: center; }
+
+.password-change-container .form-group label {
+    color: var(--text-dark);
+    font-weight: 500;
 }
 
-/* Адаптивность для публичной системы */
+.password-change-container .form-control {
+    background-color: white;
+    border: 1px solid #ddd;
+    color: var(--text-dark);
+    border-radius: 4px;
+    padding: 0.75rem;
+}
+
+.password-change-container .form-control:focus {
+    background-color: white;
+    border-color: var(--sky-blue);
+    box-shadow: 0 0 0 0.2rem rgba(127, 199, 255, 0.25);
+}
+
+.password-change-container .btn-primary, .password-change-done-container .btn-primary {
+    background-color: var(--sky-blue);
+    border-color: var(--sky-blue);
+    color: white;
+    font-weight: 500;
+}
+
+.password-change-container .btn-primary:hover, .password-change-done-container .btn-primary:hover {
+    background-color: var(--button-hover);
+    border-color: var(--button-hover);
+    color: white;
+}
+
+.password-change-container .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: white;
+}
+
+.password-change-container .btn-secondary:hover {
+    background-color: #5a6268;
+    border-color: #5a6268;
+    color: white;
+}
+
+.password-change-container .field-errors, .password-change-container .form-errors {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+    padding: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.password-change-container .field-errors ul, .password-change-container .form-errors ul {
+    margin: 0;
+    padding-left: 1rem;
+}
+
+/* Адаптивность */
 @media (max-width: 768px) {
-    .documents-grid {
-        grid-template-columns: 1fr;
-        gap: 1rem;
-    }
-    
-    .document-actions-public {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    
-    .document-actions {
-        flex-direction: column;
-    }
+    .sidebar { width: 100%; height: auto; position: relative; }
+    header, .main-container, .account-container, .pdf-viewer-container, .pdf-view-container { margin-left: 0; }
+    .account-columns { grid-template-columns: 1fr; }
+    .search-container { position: static; transform: none; width: 100%; max-width: none; margin: 1rem 0; }
+    .header-container { flex-direction: column; gap: 1rem; }
+    .account-actions { order: -1; }
+    .documents-grid { grid-template-columns: 1fr; }
+    .document-actions-public, .document-actions { flex-direction: column; }
 }

@@ -18,6 +18,8 @@ urlpatterns = [
     path('publish/<int:id>/', views.publish_document, name='publish_document'),
     path('public/<int:id>/', views.public_detail, name='public_detail'),
     path('logout/', auth_views.LogoutView.as_view(next_page='auth'), name='logout'),
+    path('password/change/', views.password_change, name='password_change'),
+    path('password/change/done/', views.password_change_done, name='password_change_done'),
 ]
 
 if settings.DEBUG:

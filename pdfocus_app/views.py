@@ -1,9 +1,9 @@
 from django.contrib import messages
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
-from .forms import PDFUploadForm, NoteForm, CustomAuthenticationForm, CustomUserCreationForm
+from .forms import PDFUploadForm, NoteForm, CustomAuthenticationForm, CustomUserCreationForm, CustomPasswordChangeForm
 from .models import PDFDocument, Note, PDFPageText
 from django.views.decorators.http import require_POST
 from .utils import extract_text_from_pdf, extract_keywords_from_text, extract_theme_from_text, extract_text_by_pages
@@ -377,6 +377,24 @@ def public_detail(request, id):
         'page_texts': page_texts_dict,
         'is_readonly': True
     })
+
+
+@login_required
+def password_change(request):
+    if request.method == 'POST':
+        form = CustomPasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Обновляем сессию пользователя
+            update_session_auth_hash(request, user)
+            return redirect('password_change_done')
+    else:
+        form = CustomPasswordChangeForm(request.user)
+    return render(request, 'registration/password_change_form.html', {'form': form})
+
+@login_required
+def password_change_done(request):
+    return render(request, 'registration/password_change_done.html')
 
 
 

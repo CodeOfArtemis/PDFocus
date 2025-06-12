@@ -4,7 +4,7 @@
     align-items: center;
     min-height: 100vh;
     background: var(--light-gray);
-    margin-left: 280px;
+    padding: 2rem;
 }
 
 .auth-container {

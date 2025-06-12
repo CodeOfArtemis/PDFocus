@@ -5,6 +5,7 @@ import os
 import PyPDF2
 from PIL import Image
 from PDFocus import settings
+import yake
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
@@ -115,43 +116,22 @@ def extract_text_by_pages(pdf_file):
 
 def extract_keywords_from_text(text):
     """
-    Извлекает ключевые слова из текста с помощью NLTK.
+    Извлекает ключевые слова из текста с помощью TextRank.
     Returns a comma-separated string of keywords.
     """
     if not text:
         return ""
 
     try:
-        # Предварительная обработка текста
-        cleaned_text = preprocess_text_for_keywords(text)
-        if not cleaned_text:
-            return ""
-
-        # Токенизация
-        tokens = word_tokenize(cleaned_text)
-        
-        # Получаем стоп-слова
-        stop_words = set(stopwords.words('russian'))
-        stop_words.update(stopwords.words('english'))
-        
-        # Фильтруем токены
-        filtered_tokens = [word.lower() for word in tokens 
-                         if word.isalnum() and 
-                         word.lower() not in stop_words and 
-                         len(word) > 2]
-        
-        # Создаем частотное распределение
-        fdist = FreqDist(filtered_tokens)
-        
-        # Получаем топ-10 самых частых слов
-        keywords = [word for word, freq in fdist.most_common(10)]
+        # Используем TextRank для извлечения ключевых слов
+        keywords = extract_keywords_textrank(text, num_keywords=10)
         
         # Постобработка ключевых слов
-        processed_keywords = postprocess_keywords(keywords)
+        if keywords:
+            processed_keywords = postprocess_keywords(keywords.split(", "))
+            return ", ".join(processed_keywords[:5])
         
-        # Возвращаем топ-5 после обработки
-        result = ", ".join(processed_keywords[:5])
-        return result
+        return keywords
     except Exception as e:
         print(f"Error extracting keywords: {e}")
         return ""
@@ -297,3 +277,52 @@ def extract_theme_from_text(text, word_count=5):
         theme = " ".join(text.split()[:9]) + "..."
     
     return theme if theme else "Не удалось определить тему"
+
+def extract_keywords_textrank(text, num_keywords=10):
+    """
+    Извлекает ключевые слова из текста с помощью алгоритма TextRank.
+    
+    Args:
+        text (str): Исходный текст
+        num_keywords (int): Количество ключевых слов для извлечения
+        
+    Returns:
+        str: Строка с ключевыми словами, разделенными запятыми
+    """
+    if not text:
+        return ""
+    
+    try:
+        # Создаем парсер для текста
+        parser = PlaintextParser.from_string(text, Tokenizer("russian"))
+        
+        # Создаем экземпляр TextRank
+        summarizer = TextRankSummarizer()
+        
+        # Получаем предложения с их весами
+        sentences = summarizer(parser.document, num_keywords)
+        
+        # Извлекаем ключевые слова из предложений
+        keywords = []
+        for sentence in sentences:
+            # Токенизируем предложение
+            words = word_tokenize(str(sentence))
+            
+            # Фильтруем слова
+            filtered_words = [word.lower() for word in words 
+                            if word.isalnum() and 
+                            len(word) > 2 and 
+                            word.lower() not in stopwords.words('russian')]
+            
+            keywords.extend(filtered_words)
+        
+        # Удаляем дубликаты, сохраняя порядок
+        seen = set()
+        unique_keywords = [x for x in keywords if not (x in seen or seen.add(x))]
+        
+        # Возвращаем топ-N ключевых слов
+        return ", ".join(unique_keywords[:num_keywords])
+        
+    except Exception as e:
+        print(f"Error extracting keywords with TextRank: {e}")
+        return ""

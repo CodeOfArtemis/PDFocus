@@ -15,12 +15,12 @@
         <div class="sidebar-header">
             <h3>📂 Добро пожаловать!</h3>
         </div>
-    {% if user.is_authenticated %}
+        {% if user.is_authenticated %}
         <ul class="sidebar-menu">
             <li><a href="{% url 'main' %}" class="{% if request.path == '/main/' %}active{% endif %}">🏠<span>Главная</span></a></li>
             <li><a href="{% url 'catalog' %}" class="{% if request.path == '/catalog/' %}active{% endif %}">📚<span>Каталог PDF</span></a></li>
         </ul>
-    {% endif %}
+        {% endif %}
     </div>
     <header>
         <div class="header-container">
@@ -47,7 +47,7 @@
         </div>
     </header>
 
-    <div class="main-container" style="{% if not request.user.is_authenticated %}margin-left: 0;{% endif %}">
+    <div class="main-container">
         {% block content %}{% endblock %}
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>

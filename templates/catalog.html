@@ -16,9 +16,7 @@
         <div class="pdf-info">
             <h3>{{ document.title }}</h3>
             {% if document.user != request.user %}
-                <div class="public-badge-small">
-                    <span class="badge badge-public-small">Публичный</span>
-                </div>
+                <span class="badge badge-public-small">Публичный</span>
             {% endif %}
             <div class="pdf-meta">
                 <span>{{ document.authors }}</span>
